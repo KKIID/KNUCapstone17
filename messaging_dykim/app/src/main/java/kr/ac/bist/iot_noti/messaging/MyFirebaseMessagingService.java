@@ -1,13 +1,18 @@
 package kr.ac.bist.iot_noti.messaging;
 
+import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
@@ -22,18 +27,27 @@ import kr.ac.bist.iot_noti.R;
  * Created by BIST120 on 2017-05-07.
  */
 
+
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
-
     /**
      * Called when message is received.
      *
      * @param remoteMessage Object representing the message received from Firebase Cloud Messaging.
      */
     // [START receive_message]
+    private AlertDialog.Builder builder;
+    Handler  handler = new Handler(){
+        public void handleMessage(Message msg){
+            if(msg.what==0) {
+
+                builder.show();
+            }
+        }
+    };
     @Override
-    public void onMessageReceived(RemoteMessage remoteMessage) {
+    public void onMessageReceived(final RemoteMessage remoteMessage) {
         // [START_EXCLUDE]
         // There are two types of messages data messages and notification messages. Data messages are handled
         // here in onMessageReceived whether the app is in the foreground or background. Data messages are the type
@@ -61,11 +75,29 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             }
 
         }
+        builder =  new AlertDialog.Builder(MainActivity.mContext);
+        builder.setTitle(remoteMessage.getNotification().getTitle())
+                .setMessage(remoteMessage.getNotification().getBody())
+                .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
 
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    handler.sendEmptyMessage(0);
+                }
+            });
+            thread.run();
         }
+
+
 
         // Also if you intend on generating your own notifications as a result of a received FCM
         // message, here is where that should be initiated. See sendNotification method below.
