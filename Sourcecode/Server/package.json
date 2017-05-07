@@ -1,0 +1,31 @@
+{
+  "name": "tea",
+  "version": "1.0.0",
+  "description": "tea",
+  "main": "main.js",
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "encoding": "^0.1.12",
+    "express": "^4.15.2",
+    "sequelize": "^3.30.4",
+    "socket.io": "^1.7.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "seonyong",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KKIID/KNUCapstone17.git"
+  },
+  "keywords": [
+    "iot"
+  ],
+  "bugs": {
+    "url": "https://github.com/KKIID/KNUCapstone17/issues"
+  },
+  "homepage": "https://github.com/KKIID/KNUCapstone17#readme"
+}
