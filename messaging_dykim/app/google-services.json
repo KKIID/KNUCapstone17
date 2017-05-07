@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "624610752298",
+    "firebase_url": "https://iot-noti2.firebaseio.com",
+    "project_id": "iot-noti2",
+    "storage_bucket": "iot-noti2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:624610752298:android:6a0c0aa391edde0f",
+        "android_client_info": {
+          "package_name": "kr.ac.bist.iot_noti"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "624610752298-rp7vponv62se4p72p254hk6v3hirog7q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAeAPKAyu8k5aX29yVECOZGjEJInWOLmQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
