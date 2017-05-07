@@ -1,4 +1,4 @@
-package kr.ac.bist.iot_noti.messaging;
+package kr.ac.bist.iot_noti.Service;
 
 import android.util.Log;
 

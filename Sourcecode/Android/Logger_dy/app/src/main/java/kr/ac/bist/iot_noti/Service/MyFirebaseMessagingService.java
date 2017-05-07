@@ -1,4 +1,4 @@
-package kr.ac.bist.iot_noti.messaging;
+package kr.ac.bist.iot_noti.Service;
 
 import android.app.AlertDialog;
 import android.app.NotificationManager;
@@ -12,7 +12,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
@@ -20,7 +19,7 @@ import com.firebase.jobdispatcher.Job;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import kr.ac.bist.iot_noti.MainActivity;
+import kr.ac.bist.iot_noti.Activity.MainActivity;
 import kr.ac.bist.iot_noti.R;
 
 /**
