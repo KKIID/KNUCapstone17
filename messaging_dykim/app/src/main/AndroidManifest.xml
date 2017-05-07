@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="kr.ac.bist.iot_noti">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:allowBackup="true"
@@ -17,8 +19,34 @@
             </intent-filter>
 
         </activity>
-            <activity android:name=".MainActivity">
-        </activity>
+        <activity android:name=".MainActivity"></activity>
+        <service android:name="kr.ac.bist.iot_noti.messaging.MyFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+
+        </service>
+
+        <!-- [END firebase_service] -->
+
+        <!-- [START firebase_iid_service] -->
+
+        <service android:name="kr.ac.bist.iot_noti.messaging.MyFirebaseInstanceIDService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+
+        </service>
+
+        <!-- [END firebase_iid_service] -->
+
+        <service
+            android:name="kr.ac.bist.iot_noti.messaging.MyJobService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
