@@ -19,7 +19,7 @@ import com.firebase.jobdispatcher.Job;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import kr.ac.bist.iot_noti.Activity.MainActivity;
+import kr.ac.bist.iot_noti.Activity.ScrollingActivity;
 import kr.ac.bist.iot_noti.R;
 
 /**
@@ -40,8 +40,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     Handler  handler = new Handler(){
         public void handleMessage(Message msg){
             if(msg.what==0) {
-
                 builder.show();
+                ScrollingActivity.mAdapter.notifyDataSetChanged();
+
             }
         }
     };
@@ -74,7 +75,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             }
 
         }
-        builder =  new AlertDialog.Builder(MainActivity.mContext);
+        builder =  new AlertDialog.Builder(ScrollingActivity.mContext);
         builder.setTitle(remoteMessage.getNotification().getTitle())
                 .setMessage(remoteMessage.getNotification().getBody())
                 .setPositiveButton("확인", new DialogInterface.OnClickListener() {
@@ -86,6 +87,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
+            Intent intent = new Intent("kr.ac.bist.iot_noti.fcmNotification");
+            sendBroadcast(intent);
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
             Thread thread = new Thread(new Runnable() {
                 @Override
@@ -130,7 +133,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      * @param messageBody FCM message body received.
      */
     private void sendNotification(String messageBody) {             //메세지를 Notification으로 띄워주는 부분.
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, ScrollingActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
