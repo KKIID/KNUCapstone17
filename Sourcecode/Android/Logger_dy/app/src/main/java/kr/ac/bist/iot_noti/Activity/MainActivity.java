@@ -86,7 +86,7 @@ public class MainActivity extends Activity {
                 JSONObject object;
                 try {
                     object = array.getJSONObject(i);
-                    myDataset.add(0, new NotificationData("시간" + object.getString("createdAt"), "내용" + object.getString("name")));
+                    myDataset.add(0, new NotificationData( object.getString("name"), object.getString("createdAt")));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
