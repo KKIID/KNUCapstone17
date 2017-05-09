@@ -50,7 +50,6 @@ public class ScrollingActivity extends AppCompatActivity {
     private ArrayList<NotificationData> myDataset;
     public static Context mContext;
     private BroadcastReceiver myReceiver;
-    private int result;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -195,9 +194,6 @@ public class ScrollingActivity extends AppCompatActivity {
         conn.execute("GET", ConnManager.main_url + ConnManager.log_url);
         return conn.get();
     }
-    public RecyclerView.Adapter getAdapter() {
-        return mAdapter;
-    }
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && null != data) {
@@ -215,20 +211,6 @@ public class ScrollingActivity extends AppCompatActivity {
             editor.putString("picturePath",picturePath);
             editor.commit();
         }
-    }
-    public int permissionRequester(String permission){
-        int i= new PermissionRequester.Builder(ScrollingActivity.this)
-                .setTitle("권한 요청")
-                .setMessage("권한을 요청합니다.")
-                .setPositiveButtonName("네")
-                .setNegativeButtonName("아니요.")
-                .create()
-                .request(permission, 1000, new PermissionRequester.OnClickDenyButtonListener() {
-                    @Override
-                    public void onClick(Activity activity) {
-                    }
-                });
-        return i;
     }
 }
 

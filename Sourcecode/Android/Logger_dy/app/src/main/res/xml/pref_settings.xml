@@ -20,11 +20,6 @@
             android:summaryOn="진동을 울려 응급상황을 알도록 해줍니다."
             android:summaryOff="무음시에 진동을 울리지 않습니다."
             />
-        <Preference
-            android:title="사진 수정"
-            android:summary="휴대폰에 저장된 사진으로 어플을 꾸미세요."
-            >
-        </Preference>
     </PreferenceCategory>
 
     <PreferenceCategory
