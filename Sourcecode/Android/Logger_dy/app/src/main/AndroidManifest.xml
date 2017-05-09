@@ -52,7 +52,7 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".Activity.SettingActivity"></activity>
+        <activity android:name=".Activity.SettingsActivity"></activity>
     </application>
 
 </manifest>

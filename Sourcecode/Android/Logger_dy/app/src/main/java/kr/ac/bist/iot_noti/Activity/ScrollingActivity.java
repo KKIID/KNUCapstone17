@@ -14,15 +14,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -36,6 +33,7 @@ import java.util.concurrent.ExecutionException;
 
 import kr.ac.bist.iot_noti.Adapter.NotificationData;
 import kr.ac.bist.iot_noti.Adapter.NotificationDataAdaptor;
+import kr.ac.bist.iot_noti.Permission.PermissionRequester;
 import kr.ac.bist.iot_noti.R;
 import kr.ac.bist.iot_noti.messaging.ConnManager;
 
@@ -160,7 +158,7 @@ public class ScrollingActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        Intent intent = new Intent(ScrollingActivity.this, SettingActivity.class);
+        Intent intent = new Intent(ScrollingActivity.this, SettingsActivity.class);
         startActivity(intent);
         return super.onOptionsItemSelected(item);
     }
