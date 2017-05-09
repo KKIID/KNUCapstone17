@@ -1,15 +1,20 @@
 package kr.ac.bist.iot_noti.Service;
 
 import android.app.AlertDialog;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
+import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -30,6 +35,8 @@ import kr.ac.bist.iot_noti.R;
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
+    private Boolean setVibrate;
+    private Vibrator vibrator;
     /**
      * Called when message is received.
      *
@@ -37,15 +44,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      */
     // [START receive_message]
     private AlertDialog.Builder builder;
-    Handler  handler = new Handler(){
-        public void handleMessage(Message msg){
-            if(msg.what==0) {
+    Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+            if (msg.what == 0) {
                 builder.show();
                 ScrollingActivity.mAdapter.notifyDataSetChanged();
 
             }
         }
     };
+
     @Override
     public void onMessageReceived(final RemoteMessage remoteMessage) {
         // [START_EXCLUDE]
@@ -57,10 +65,26 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // and data payloads are treated as notification messages. The Firebase console always sends notification
         // messages. For more see: https://firebase.google.com/docs/cloud-messaging/concept-options
         // [END_EXCLUDE]
+        SharedPreferences appPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        setVibrate = appPreferences.getBoolean("key_vibrationSet", true);
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK
+                | PowerManager.ACQUIRE_CAUSES_WAKEUP, "TAG");
+        wakeLock.acquire(3000);
 
+
+        if (setVibrate) {
+            vibrator.vibrate(new long[]{200, 100, 200, 100, 200, 100}, -1);
+        }
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
+        Log.d(TAG, setVibrate + "//");
         Log.d(TAG, "From: " + remoteMessage.getFrom());
+        Log.d("TAG", "Send Notification 실행 중 message");
+
+        sendNotification(remoteMessage);
+        Log.d("TAG", "Send Notification 실행 중 message");
 
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
@@ -75,35 +99,38 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             }
 
         }
-        builder =  new AlertDialog.Builder(ScrollingActivity.mContext);
-        builder.setTitle(remoteMessage.getNotification().getTitle())
-                .setMessage(remoteMessage.getNotification().getBody())
+        builder = new AlertDialog.Builder(ScrollingActivity.mContext);
+        builder.setTitle(remoteMessage.getData().get("title"))
+                .setMessage(remoteMessage.getData().get("body"))
                 .setPositiveButton("확인", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+
+                        vibrator.cancel();
                         dialogInterface.dismiss();
                     }
                 });
 
         // Check if message contains a notification payload.
-        if (remoteMessage.getNotification() != null) {
-            Intent intent = new Intent("kr.ac.bist.iot_noti.fcmNotification");
-            sendBroadcast(intent);
-            Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
+        if (remoteMessage.getData() != null) {
+
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
+                    Intent intent = new Intent("kr.ac.bist.iot_noti.fcmNotification");
+                    sendBroadcast(intent);
                     handler.sendEmptyMessage(0);
                 }
             });
             thread.run();
+
         }
-
-
-
-        // Also if you intend on generating your own notifications as a result of a received FCM
-        // message, here is where that should be initiated. See sendNotification method below.
     }
+
+    // Also if you intend on generating your own notifications as a result of a received FCM
+    // message, here is where that should be initiated. See sendNotification method below.
+
+
     // [END receive_message]
 
     /**
@@ -127,29 +154,32 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "Short lived task is done.");
     }
 
-    /**
-     * Create and show a simple notification containing the received FCM message.
-     *
-     * @param messageBody FCM message body received.
-     */
-    private void sendNotification(String messageBody) {             //메세지를 Notification으로 띄워주는 부분.
+
+    private void sendNotification(RemoteMessage remoteMessage) {             //메세지를 Notification으로 띄워주는 부분.
+        Log.d("TAG", "Send Notification 실행 중 message");
+
+
         Intent intent = new Intent(this, ScrollingActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
-        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_stat_ic_notification)
-                .setContentTitle("FCM Message")
-                .setContentText(messageBody)
+                .setSmallIcon(R.drawable.icon)
+                .setContentTitle(remoteMessage.getData().get("title"))
+                .setContentText(remoteMessage.getData().get("body"))
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent);
+                .setContentIntent(pendingIntent)
+                .setVibrate(new long[]{200, 100, 200, 100, 200, 100})
+                .setLights(000000000025, 500, 2000);
+
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+
     }
 }
