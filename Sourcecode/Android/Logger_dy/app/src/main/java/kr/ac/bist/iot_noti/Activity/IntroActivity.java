@@ -18,6 +18,7 @@ import kr.ac.bist.iot_noti.messaging.ConnManager;
 
 public class IntroActivity extends AppCompatActivity{
     ConnManager conn = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +37,7 @@ public class IntroActivity extends AppCompatActivity{
                 conn = new ConnManager();
                 String[] string = {"name", Build.ID, "key", token};
                 conn.execute("POST",ConnManager.main_url+ConnManager.user_url,ConnManager.makeParams(string));
+
                 startActivity(intent);
                 finish();
             }

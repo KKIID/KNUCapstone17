@@ -11,32 +11,28 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
+
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -71,12 +67,10 @@ public class ScrollingActivity extends AppCompatActivity {
         mAdapter = new NotificationDataAdaptor(myDataset);
         mRecyclerView.setAdapter(mAdapter);
 
-        permissionRequester(Manifest.permission.CAMERA);
-
-        SharedPreferences image = getSharedPreferences("iotalarm",MODE_PRIVATE);
-        if(image.contains("picturePath")) {
+        SharedPreferences image = getSharedPreferences("iotalarm", MODE_PRIVATE);
+        if (image.contains("picturePath")) {
             ImageView view = (ImageView) findViewById(R.id.bar_img);
-            view.setImageBitmap(BitmapFactory.decodeFile(image.getString("picturePath","")));
+            view.setImageBitmap(BitmapFactory.decodeFile(image.getString("picturePath", "")));
         }
         IntentFilter intentfilter = new IntentFilter();
         intentfilter.addAction("kr.ac.bist.iot_noti.fcmNotification");
@@ -97,46 +91,25 @@ public class ScrollingActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (result == PermissionRequester.ALREADY_GRANTED) {
-                    Log.d("RESULT", "권한이 이미 존재함.");
-                    if (ActivityCompat.checkSelfPermission(ScrollingActivity.this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
-                        Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:010-1111-1111"));
-                        startActivity(intent);
-                    }
-                } else if (result == PermissionRequester.NOT_SUPPORT_VERSION) {
-                    Log.d("RESULT", "마쉬멜로우 이상 버젼 아님.");
-                    Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:010-1111-1111"));
-                    startActivity(intent);
-                } else if (result == PermissionRequester.REQUEST_PERMISSION) {
-                    Log.d("RESULT", "요청함. 응답을 기다림.");
-                    permissionRequester(Manifest.permission.CAMERA);
-                    Log.d("permisson",result+"");
-                }
+                new TedPermission(ScrollingActivity.this)
+                        .setPermissionListener(new PermissionListener() {
+                            @Override
+                            public void onPermissionGranted() {
+                                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:010-1111-1111"));
+                                if (ActivityCompat.checkSelfPermission(ScrollingActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                                    return;
+                                }
+                                startActivity(intent);
+                            }
+                            @Override
+                            public void onPermissionDenied(ArrayList<String> deniedPermissions) {
+                            }
+                        })
+                        .setDeniedMessage("전화를 걸기 위해서는 권한이 필요합니다\n\n[설정] > [권한]에서 전화권한을 켜주세요")
+                        .setPermissions(Manifest.permission.CALL_PHONE)
+                        .check();
             }
         });
-    }
-
-    private void permissionRequester(String permission){
-        result = new PermissionRequester.Builder(ScrollingActivity.this)
-                .setTitle("권한 요청")
-                .setMessage("권한을 요청합니다.")
-                .setPositiveButtonName("네")
-                .setNegativeButtonName("아니요.")
-                .create()
-                .request(permission, 1000, new PermissionRequester.OnClickDenyButtonListener() {
-                    @Override
-                    public void onClick(Activity activity) {
-                    }
-                });
-    }
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == 1000) { // 요청한 권한을 사용자가 "허용" 했다면...
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(ScrollingActivity.this, "권한요청을 허용했습니다.", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(ScrollingActivity.this, "권한요청을 거부했습니다.", Toast.LENGTH_SHORT).show();
-            }
-        }
     }
     public boolean onCreateOptionsMenu(android.view.Menu menu) {
         //ToolBar Menu Icon 생성
@@ -152,36 +125,24 @@ public class ScrollingActivity extends AppCompatActivity {
                 break;
             }
             case R.id.pic_setting: {
-                int permission_result = new PermissionRequester.Builder(ScrollingActivity.this)
-                        .setTitle("권한 요청")
-                        .setMessage("권한을 요청합니다.")
-                        .setPositiveButtonName("네")
-                        .setNegativeButtonName("아니요.")
-                        .create()
-                        .request(Manifest.permission.READ_EXTERNAL_STORAGE, 1000, new PermissionRequester.OnClickDenyButtonListener() {
+                new TedPermission(this)
+                        .setPermissionListener(new PermissionListener() {
                             @Override
-                            public void onClick(Activity activity) {
-                                Log.d("xxx", "취소함.");
+                            public void onPermissionGranted() {
+                                Intent i = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                startActivityForResult(i, RESULT_LOAD_IMAGE);
                             }
-                        });
-                if (result == PermissionRequester.ALREADY_GRANTED) {
-                    Log.d("RESULT", "권한이 이미 존재함.");
-                    if (ActivityCompat.checkSelfPermission(ScrollingActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                        Intent i = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                        startActivityForResult(i, RESULT_LOAD_IMAGE);
-                    }
-                } else if (result == PermissionRequester.NOT_SUPPORT_VERSION) {
-                    Log.d("RESULT", "마쉬멜로우 이상 버젼 아님.");
-                    Intent i = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    startActivityForResult(i, RESULT_LOAD_IMAGE);
-                } else if (result == PermissionRequester.REQUEST_PERMISSION) {
-                    Log.d("RESULT", "요청함. 응답을 기다림.");
-                    permissionRequester(Manifest.permission.READ_EXTERNAL_STORAGE);
-                    Log.d("permisson",result+"");
+                            @Override
+                            public void onPermissionDenied(ArrayList<String> deniedPermissions) {
+
+                            }
+                        })
+                        .setDeniedMessage("사진을 설정하기 위해서는 권한이 필요합니다\n\n[설정] > [권한]에서 저장공간 권한을 켜주세요")
+                        .setPermissions(Manifest.permission.READ_EXTERNAL_STORAGE)
+                        .check();
                 }
                 break;
             }
-        }
         return super.onOptionsItemSelected(item);
     }
     public void refreshData() {
@@ -254,6 +215,20 @@ public class ScrollingActivity extends AppCompatActivity {
             editor.putString("picturePath",picturePath);
             editor.commit();
         }
+    }
+    public int permissionRequester(String permission){
+        int i= new PermissionRequester.Builder(ScrollingActivity.this)
+                .setTitle("권한 요청")
+                .setMessage("권한을 요청합니다.")
+                .setPositiveButtonName("네")
+                .setNegativeButtonName("아니요.")
+                .create()
+                .request(permission, 1000, new PermissionRequester.OnClickDenyButtonListener() {
+                    @Override
+                    public void onClick(Activity activity) {
+                    }
+                });
+        return i;
     }
 }
 
