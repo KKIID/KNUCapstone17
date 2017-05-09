@@ -31,7 +31,7 @@ public class IntroActivity extends AppCompatActivity{
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(IntroActivity.this,MainActivity.class);
+                Intent intent = new Intent(IntroActivity.this,ScrollingActivity.class);
                 String token = FirebaseInstanceId.getInstance().getToken();
                 conn = new ConnManager();
                 String[] string = {"name", Build.ID, "key", token};
