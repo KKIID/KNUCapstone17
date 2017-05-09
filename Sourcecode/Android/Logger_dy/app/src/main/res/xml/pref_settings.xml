@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    
+    >
+    <PreferenceCategory
+        android:title="어플리케이션 설정">
+        <EditTextPreference
+            android:defaultValue="01012341234"
+            android:key="key_userNbr"
+            android:title="발신 전화번호 설정"
+            android:inputType="number"
+            android:hint="01012341234"
+            android:summary="상황 발생 시 발신할 전화번호입니다."
+            />
+        <CheckBoxPreference
+            android:enabled="true"
+            android:key="key_vibrationSet"
+            android:title="진동 유무 설정"
+            android:defaultValue="true"
+            android:summaryOn="진동을 울려 응급상황을 알도록 해줍니다."
+            android:summaryOff="무음시에 진동을 울리지 않습니다."
+            />
+        <Preference
+            android:title="사진 수정"
+            android:summary="휴대폰에 저장된 사진으로 어플을 꾸미세요."></Preference>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="어플리케이션 정보">
+        <Preference
+            android:title="개발자 정보"
+            android:summary="개발자 정보를 확인합니다.">
+            <!--intent 사용하여 개발자 정보 열람 가능.-->
+        </Preference>
+        <Preference
+            android:title="메일 보내기"
+            android:summary="개발자에게 메일을 보냅니다."
+            ></Preference>
+    </PreferenceCategory>
+</PreferenceScreen>
