@@ -3,10 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="kr.ac.bist.iot_noti.Activity.ScrollingActivity">
     <item
+        android:id="@+id/pic_setting"
+        android:title="@string/action_settings"
+        android:icon="@drawable/cam"
+        app:showAsAction="ifRoom"
+        />
+    <item
         android:id="@+id/action_settings"
         android:title="@string/action_settings"
         android:icon="@drawable/setting"
         app:showAsAction="ifRoom"
-
         />
 </menu>
