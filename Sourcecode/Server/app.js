@@ -7,7 +7,8 @@ app.get('/',function (req,res){
 
 app.listen(9191,function() {
     console.log("Welcome to Silver-IoT Server...");
-    require('./models').sequelize.sync({force: true})
+    require('./models').sequelize.sync({        
+        force: true})
         .then(()=>{
             console.log('Database Sync');
             console.log("Synchronization Done\nServer On");

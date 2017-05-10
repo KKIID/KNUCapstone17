@@ -1,5 +1,7 @@
 package kr.ac.bist.iot_noti.Adapter;
 
+import java.util.Calendar;
+
 /**
  * Created by Bist on 2017-05-07.
  */
@@ -14,20 +16,37 @@ public class NotificationData  {
 }
 
 class NotiDate {
-    private int year;
-    private int month;
-    private int date;
-    private int hour;
-    private int min;
-    private int sec;
+    int year;
+    int month;
+    int date;
+    int hour;
+    int min;
+    int sec;
+
 
     public NotiDate(String s) {
+        setTime(s);
+        Calendar cal = Calendar.getInstance();
+        cal.set(year,month,date,hour,min,sec);
+        cal.add(Calendar.HOUR_OF_DAY,9);
+        setTime(cal);
+    }
+
+    public void setTime(String s) {
         year = Integer.parseInt(s.substring(0,4));
         month = Integer.parseInt(s.substring(5,7));
         date = Integer.parseInt(s.substring(8,10));
         hour = Integer.parseInt(s.substring(11,13));
         min = Integer.parseInt(s.substring(14,16));
         sec = Integer.parseInt(s.substring(17,19));
+    }
+    public void setTime(Calendar cal) {
+        year = cal.get(Calendar.YEAR);
+        month = cal.get(Calendar.MONTH);
+        date = cal.get(Calendar.DATE);
+        hour = cal.get(Calendar.HOUR_OF_DAY);
+        min = cal.get(Calendar.MINUTE);
+        sec = cal.get(Calendar.SECOND);
     }
 
     public String getDay() {
