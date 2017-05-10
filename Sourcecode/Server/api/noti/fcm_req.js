@@ -5,9 +5,10 @@ var fcm = new FCM(serverKey);
 exports.sendMsg = function (deviceId, title, message) {
     var msg = {
         to: deviceId,
-        notification: {
+        data: {
             title: title,
-            body: message
+            body: message,
+            sound: "default"
         }
     };
     fcm.send(msg, function(err, response){

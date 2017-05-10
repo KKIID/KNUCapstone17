@@ -1,4 +1,5 @@
 const models = require('../../models');
+const noti = require('../noti/fcm_req');
 
 exports.index = (req, res) => {
 	 models.Log.findAll().then(users => res.json(users));
@@ -43,6 +44,13 @@ exports.create = (req, res) => {
 
   models.Log.create({
     name: name
-  }).then((user) => res.status(201).json(user))
+  }).then((log) => {
+    models.User.findAll().then(users => {
+        users.forEach( (item,index)=> {
+            noti.sendMsg(item.dataValues.key,"SmartHome 알리미", name);
+        });
+        res.status(201).json(log)
+    })
+  })
 };
 
