@@ -15,6 +15,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -50,12 +51,14 @@ public class ScrollingActivity extends AppCompatActivity {
     private ArrayList<NotificationData> myDataset;
     public static Context mContext;
     private BroadcastReceiver myReceiver;
-
+    SharedPreferences appPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scrolling);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        appPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        toolbar.setTitle( appPreferences.getString("key_appname",""));
         setSupportActionBar(toolbar);
         mContext = this;
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
@@ -94,7 +97,7 @@ public class ScrollingActivity extends AppCompatActivity {
                         .setPermissionListener(new PermissionListener() {
                             @Override
                             public void onPermissionGranted() {
-                                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:010-1111-1111"));
+                                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:"+appPreferences.getString("key_userNbr","")));
                                 if (ActivityCompat.checkSelfPermission(ScrollingActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                                     return;
                                 }
@@ -121,6 +124,7 @@ public class ScrollingActivity extends AppCompatActivity {
             case R.id.action_settings: {
                 Intent intent = new Intent(ScrollingActivity.this, SettingsActivity.class);
                 startActivity(intent);
+                finish();
                 break;
             }
             case R.id.pic_setting: {

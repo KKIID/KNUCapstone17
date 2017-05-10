@@ -5,6 +5,14 @@
     <PreferenceCategory
         android:title="어플리케이션 설정">
         <EditTextPreference
+            android:defaultValue="@string/app_name2"
+            android:key="key_appname"
+            android:title="알리미 문구 설정"
+            android:inputType="text"
+            android:hint="Smart Home 알리미"
+            android:summary="어플 상단에 표시될 문구를 설정해주세요."
+            />
+        <EditTextPreference
             android:defaultValue="01012341234"
             android:key="key_userNbr"
             android:title="발신 전화번호 설정"
