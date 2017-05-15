@@ -47,7 +47,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     Handler handler = new Handler() {
         public void handleMessage(Message msg) {
             if (msg.what == 0) {
-                builder.show();
+                try {
+                    builder.show();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 ScrollingActivity.mAdapter.notifyDataSetChanged();
 
             }

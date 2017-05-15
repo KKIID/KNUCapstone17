@@ -20,12 +20,19 @@ public class SettingsActivity extends PreferenceActivity {
         SharedPreferences appPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         phoneNbr = appPreferences.getString("key_userNbr","");
         Log.d("TAG", phoneNbr+"");
+        appPreferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                Intent intent = new Intent("kr.ac.bist.iot_noti.settingChange");
+                sendBroadcast(intent);
+            }
+        });
     }
 
-    @Override
+/*    @Override
     protected void onDestroy() {
         Intent intent = new Intent(SettingsActivity.this, ScrollingActivity.class);
         startActivity(intent);
         super.onDestroy();
-    }
+    }*/
 }

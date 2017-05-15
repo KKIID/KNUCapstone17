@@ -17,12 +17,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -52,11 +55,14 @@ public class ScrollingActivity extends AppCompatActivity {
     public static Context mContext;
     private BroadcastReceiver myReceiver;
     SharedPreferences appPreferences;
+    private Toolbar toolbar;
+    private CollapsingToolbarLayout appBarLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scrolling);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        appBarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         appPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         toolbar.setTitle( appPreferences.getString("key_appname",""));
         setSupportActionBar(toolbar);
@@ -76,6 +82,7 @@ public class ScrollingActivity extends AppCompatActivity {
         }
         IntentFilter intentfilter = new IntentFilter();
         intentfilter.addAction("kr.ac.bist.iot_noti.fcmNotification");
+        intentfilter.addAction("kr.ac.bist.iot_noti.settingChange");
         refreshData();
 
 
@@ -84,6 +91,11 @@ public class ScrollingActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals("kr.ac.bist.iot_noti.fcmNotification")) {
                     refreshData();
+                }
+                if(intent.getAction().equals("kr.ac.bist.iot_noti.settingChange")){
+                    
+                    appBarLayout.setTitle(appPreferences.getString("key_appname",""));
+
                 }
             }
         };
@@ -124,7 +136,7 @@ public class ScrollingActivity extends AppCompatActivity {
             case R.id.action_settings: {
                 Intent intent = new Intent(ScrollingActivity.this, SettingsActivity.class);
                 startActivity(intent);
-                finish();
+                //finish();
                 break;
             }
             case R.id.pic_setting: {
