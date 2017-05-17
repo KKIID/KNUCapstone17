@@ -3,6 +3,7 @@ package kr.ac.bist.iot_noti.Activity;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -25,6 +26,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -74,6 +76,22 @@ public class ScrollingActivity extends AppCompatActivity {
         myDataset = new ArrayList<>();
         mAdapter = new NotificationDataAdaptor(myDataset);
         mRecyclerView.setAdapter(mAdapter);
+        new TedPermission(ScrollingActivity.this)
+                .setPermissionListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted() {
+
+                        if (ActivityCompat.checkSelfPermission(ScrollingActivity.this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED ) {
+                            return;
+                        }
+                    }
+                    @Override
+                    public void onPermissionDenied(ArrayList<String> deniedPermissions) {
+                    }
+                })
+                .setDeniedMessage("문자를 보내기 위해서는 권한이 필요합니다\n\n[설정] > [권한]에서 문자 권한을 켜주세요")
+                .setPermissions(Manifest.permission.SEND_SMS)
+                .check();
 
         SharedPreferences image = getSharedPreferences("iotalarm", MODE_PRIVATE);
         if (image.contains("picturePath")) {
@@ -93,16 +111,19 @@ public class ScrollingActivity extends AppCompatActivity {
                     refreshData();
                 }
                 if(intent.getAction().equals("kr.ac.bist.iot_noti.settingChange")){
-                    
+
                     appBarLayout.setTitle(appPreferences.getString("key_appname",""));
 
                 }
             }
         };
-        registerReceiver(myReceiver, intentfilter);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        try {
+            registerReceiver(myReceiver, intentfilter);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        fab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 new TedPermission(ScrollingActivity.this)
@@ -122,6 +143,48 @@ public class ScrollingActivity extends AppCompatActivity {
                         .setDeniedMessage("전화를 걸기 위해서는 권한이 필요합니다\n\n[설정] > [권한]에서 전화권한을 켜주세요")
                         .setPermissions(Manifest.permission.CALL_PHONE)
                         .check();
+            }
+        });
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(ScrollingActivity.this);
+                builder.setCancelable(false).setTitle("신고").setMessage("보호자께서 입력하신 아래 주소로 앰뷸런스를 호출합니다.\n<"+appPreferences.getString("key_userAddress","")+">\n\n"+ getResources().getString(R.string.alarm)).setPositiveButton("신고", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //문자 메세지 발송 부
+                        SmsManager mSmsManager = SmsManager.getDefault();
+                        ArrayList<PendingIntent> sentIntent = new ArrayList<PendingIntent>();
+                        sentIntent.add(0,PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent("SMS_SENT_ACTION"), 0));
+                        ArrayList<PendingIntent> deliveredIntent = new ArrayList<PendingIntent>();
+                        deliveredIntent.add(0,PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent("SMS_DELIVERED_ACTION"), 0));
+                        Log.d("TAG", myDataset.size()+"////"+myDataset.get(0).textContent);
+                        ArrayList<String> arrayList= new ArrayList<String>();
+                        if(myDataset.size()!=0) {
+                            String alarmData = myDataset.get(0).textContent;
+                            //응급상황이 발생하였습니다. 신고자 : 홍길동 요구조자 :홍길동 주소 : 대구광역시 북구 대학로80 경북대학교
+                            arrayList = mSmsManager.divideMessage(myDataset.get(0).textContent+" 발생하였습니다."
+                                    + "\n신고자:" + appPreferences.getString("key_userName", "") + "\n요구조자:" + appPreferences.getString("key_userName2", "")+"\n"
+                                    +"주소:" +appPreferences.getString("key_userAddress",""));
+                            mSmsManager.sendMultipartTextMessage("01089159171",null,arrayList,sentIntent,deliveredIntent);
+
+                        }else{
+                            //응급상황이 발생하였습니다. 신고자 : 홍길동 요구조자 :홍길동
+                            arrayList = mSmsManager.divideMessage("응급상황이 발생하였습니다."
+                                    + "\n신고자:" + appPreferences.getString("key_userName", "") + "\n요구조자:" + appPreferences.getString("key_userName2", "")
+                                    +"주소:" +appPreferences.getString("key_userAddress",""));
+                            mSmsManager.sendMultipartTextMessage("01089159171",null,arrayList,sentIntent,deliveredIntent);
+                        }
+                    }
+                }).setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).show();
+
             }
         });
     }
@@ -195,6 +258,7 @@ public class ScrollingActivity extends AppCompatActivity {
                 try {
                     object = array.getJSONObject(i);
                     myDataset.add(0, new NotificationData(object.getString("name"), object.getString("createdAt")));
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

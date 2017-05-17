@@ -7,6 +7,8 @@
     android:fitsSystemWindows="true"
     tools:context="kr.ac.bist.iot_noti.Activity.ScrollingActivity">
 
+
+
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
@@ -23,11 +25,10 @@
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <ImageView
+                android:id="@+id/bar_img"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:id="@+id/bar_img"
-                />
+                android:scaleType="centerCrop" />
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -39,16 +40,37 @@
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_scrolling" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+    <include layout="@layout/content_scrolling"
+        android:id="@+id/include2" />
+
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
-        app:layout_anchor="@id/app_bar"
-        app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@drawable/phonecall"
-        android:scaleType="fitXY"/>
+        android:layout_gravity="center_vertical|left"
+        app:layout_anchor="@+id/include2"
+        app:layout_anchorGravity="top|right">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|right"
+            android:layout_margin="@dimen/fab_margin"
+            app:layout_anchorGravity="top|center_horizontal"
+            app:backgroundTint="@color/colorRed"
+            app:srcCompat="@drawable/alarmcall" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|left"
+            android:layout_margin="@dimen/fab_margin"
+            android:layout_toRightOf="@id/fab"
+            android:scaleType="fitXY"
+            app:layout_anchorGravity="bottom|right"
+            app:srcCompat="@drawable/phonecall" />
+    </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

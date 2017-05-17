@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -37,6 +38,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "MyFirebaseMsgService";
     private Boolean setVibrate;
     private Vibrator vibrator;
+    private AudioManager audioManager;
     /**
      * Called when message is received.
      *
@@ -70,16 +72,24 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // messages. For more see: https://firebase.google.com/docs/cloud-messaging/concept-options
         // [END_EXCLUDE]
         SharedPreferences appPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator = (Vibrator) getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
         setVibrate = appPreferences.getBoolean("key_vibrationSet", true);
+        audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK
                 | PowerManager.ACQUIRE_CAUSES_WAKEUP, "TAG");
         wakeLock.acquire(3000);
 
-
-        if (setVibrate) {
-            vibrator.vibrate(new long[]{200, 100, 200, 100, 200, 100}, -1);
+        switch (audioManager.getRingerMode()) {
+            case AudioManager.RINGER_MODE_NORMAL:
+            case AudioManager.RINGER_MODE_VIBRATE:
+                vibrator.vibrate(new long[]{200, 100, 200, 100, 200, 100}, -1);
+                break;
+            case AudioManager.RINGER_MODE_SILENT:
+            if (setVibrate) {
+                vibrator.vibrate(new long[]{200, 100, 200, 100, 200, 100}, -1);
+            }
+            break;
         }
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ

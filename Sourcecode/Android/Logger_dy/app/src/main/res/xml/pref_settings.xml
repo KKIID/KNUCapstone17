@@ -5,6 +5,20 @@
     <PreferenceCategory
         android:title="어플리케이션 설정">
         <EditTextPreference
+            android:key="key_userName"
+            android:title="사용자 이름 설정"
+            android:inputType="text"
+            android:hint="홍길동"
+            android:summary="사용자 이름을 입력해주세요."
+            />
+        <EditTextPreference
+            android:key="key_userName2"
+            android:title="보호대상자 이름 설정"
+            android:inputType="text"
+            android:hint="홍길동"
+            android:summary="보호대상자 이름을 입력해주세요."
+            />
+        <EditTextPreference
             android:defaultValue="@string/app_name2"
             android:key="key_appname"
             android:title="알리미 문구 설정"
@@ -19,6 +33,13 @@
             android:inputType="number"
             android:hint="01012341234"
             android:summary="상황 발생 시 발신할 전화번호입니다."
+            />
+        <EditTextPreference
+            android:key="key_userAddress"
+            android:title="보호대상자 주소 설정"
+            android:inputType="text"
+            android:hint="대구광역시 북구 대학로80, 경북대학교 IT1호관"
+            android:summary="상황 발생 시 구조대에 전달할 위치입니다."
             />
         <CheckBoxPreference
             android:enabled="true"
