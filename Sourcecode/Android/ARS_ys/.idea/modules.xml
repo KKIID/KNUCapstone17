@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/KNUcapstone17yongyong.iml" filepath="$PROJECT_DIR$/KNUcapstone17yongyong.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ARS.iml" filepath="$PROJECT_DIR$/ARS.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

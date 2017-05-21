@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.yeong.knucapstone17yongyong.MainActivity">
+    tools:context="com.example.yeong.ars.MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -152,4 +152,5 @@
             android:id="@+id/dial_del"/>
 
     </LinearLayout>
+
 </LinearLayout>
