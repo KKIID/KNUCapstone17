@@ -3,7 +3,6 @@ package kr.ac.bist.ars_iot.Engine;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 

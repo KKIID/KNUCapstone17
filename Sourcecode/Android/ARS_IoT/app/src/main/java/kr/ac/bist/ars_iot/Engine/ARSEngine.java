@@ -1,5 +1,9 @@
 package kr.ac.bist.ars_iot.Engine;
 
+import java.util.concurrent.ExecutionException;
+
+import kr.ac.bist.ars_iot.Connection.ConnManager;
+
 /**
  * Created by Bist on 2017-05-21.
  */
@@ -17,7 +21,11 @@ public class ARSEngine {
                 break;
             case 1:
                 engine = new SpeakerEngine();
-                engine.execute("사용하실 제품을 선택해주세요." + getDevices());
+                if(DeviceEngine.getDevices().isEmpty()) {
+                    engine.execute("등록된 제품이 없습니다. 통화를 종료해주세요." + getDevices());
+                } else {
+                    engine.execute("사용하실 제품을 선택해주세요." + getDevices());
+                }
                 break;
             case 2:
                 engine = new SpeakerEngine();
@@ -63,7 +71,17 @@ public class ARSEngine {
     }
     private boolean passwordVerify(String string) {
         engine = new SpeakerEngine();
-        if (string.equals("1523")) {
+        ConnManager manager = new ConnManager();
+        String s = "";
+        try {
+            s = manager.execute("GET",ConnManager.main_url+ConnManager.pass_url).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        if (string.equals(s)) {
             return true;
         } else {
             engine.execute("잘못 입력하셨습니다. 다시 입력해주세요.");

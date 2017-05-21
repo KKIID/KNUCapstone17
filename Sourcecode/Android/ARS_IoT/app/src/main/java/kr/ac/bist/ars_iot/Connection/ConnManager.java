@@ -18,6 +18,7 @@ import java.net.URL;
 public class ConnManager extends AsyncTask<String, Void, String> {
     public static final String main_url = "http://bist.knu.ac.kr:9191/";
     public static final String dev_url = "devs/";
+    public static final String pass_url = "password/";
 
     private HttpURLConnection conn;
     private String result;
