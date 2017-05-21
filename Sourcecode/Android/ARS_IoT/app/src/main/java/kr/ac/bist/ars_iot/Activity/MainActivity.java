@@ -45,55 +45,67 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         preSetting();
 
     }
-
     @Override
     public void onClick(View v) {
+        SpeakerEngine speakerEngine = new SpeakerEngine();
         switch(v.getId()) {
             case R.id.dial_1:
+                speakerEngine.execute("1");
                 dial_text.append("1");
                 dial_length++;
                 break;
             case R.id.dial_2:
+                speakerEngine.execute("2");
                 dial_text.append("2");
                 dial_length++;
                 break;
             case R.id.dial_3:
+                speakerEngine.execute("3");
                 dial_text.append("3");
                 dial_length++;
                 break;
             case R.id.dial_4:
+                speakerEngine.execute("4");
                 dial_text.append("4");
                 dial_length++;
                 break;
             case R.id.dial_5:
+                speakerEngine.execute("5");
                 dial_text.append("5");
                 dial_length++;
                 break;
             case R.id.dial_6:
+                speakerEngine.execute("6");
                 dial_text.append("6");
                 dial_length++;
                 break;
             case R.id.dial_7:
+                speakerEngine.execute("7");
                 dial_text.append("7");
                 dial_length++;
                 break;
             case R.id.dial_8:
+                speakerEngine.execute("8");
                 dial_text.append("8");
                 dial_length++;
                 break;
             case R.id.dial_9:
+                speakerEngine.execute("9");
                 dial_text.append("9");
                 dial_length++;
                 break;
             case R.id.dial_0:
+                speakerEngine.execute("0");
                 dial_text.append("0");
                 dial_length++;
                 break;
             case R.id.dial_s:
+                speakerEngine.execute("별");
                 dial_text.append("*");
                 dial_length++;
                 break;
             case R.id.dial_n:
+                speakerEngine.execute("샵");
                 dial_text.append("#");
                 dial_length++;
                 break;

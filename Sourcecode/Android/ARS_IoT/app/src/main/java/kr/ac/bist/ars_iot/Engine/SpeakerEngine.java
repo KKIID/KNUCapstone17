@@ -37,7 +37,7 @@ public class SpeakerEngine extends AsyncTask<String,Void,Void> {
             connection.setRequestProperty("X-Naver-Client-Id", APPKEY);
             connection.setRequestProperty("X-Naver-Client-Secret", APP_PW);
 
-            String postParams = "speaker=mijin&speed=0&text=" + URLEncoder.encode(params[0],"UTF-8");
+            String postParams = "speaker=jinho&speed=0&text=" + URLEncoder.encode(params[0],"UTF-8");
             connection.setDoOutput(true);
 
             DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
