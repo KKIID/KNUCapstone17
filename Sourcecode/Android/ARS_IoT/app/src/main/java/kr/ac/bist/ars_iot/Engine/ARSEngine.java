@@ -8,6 +8,7 @@ public class ARSEngine {
     private int step = 0;
     private SpeakerEngine engine = null;
     private int selected;
+
     public void nextStep() {
         switch(step) {
             case 0:
@@ -20,7 +21,7 @@ public class ARSEngine {
                 break;
             case 2:
                 engine = new SpeakerEngine();
-                engine.execute(String.format("%d번, %s는 현재 %s 상태입니다. 전원을 %s려면 비밀번호와 샵버튼을 입력하세요",selected,"TV","꺼진","켜"));
+                engine.execute(getDeviceStatus(selected));
                 break;
             case 3:
                 engine = new SpeakerEngine();
@@ -28,7 +29,12 @@ public class ARSEngine {
                 break;
         }
     }
-
+    public String getDeviceStatus(int selected) {
+        String name = DeviceEngine.getDevices().get(selected-1).getName();
+        String status = (DeviceEngine.getDevices().get(selected-1).getStatus())?"켜진":"꺼진";
+        String newStatus = (DeviceEngine.getDevices().get(selected-1).getStatus())?"끄":"켜";
+        return String.format("%d번, %s는 현재 %s 상태입니다. 전원을 %s려면 비밀번호와 샵버튼을 입력하세요",selected,name,status,newStatus);
+    }
     public void doStep(String string) {
         switch (step) {
             case 0:
@@ -55,7 +61,6 @@ public class ARSEngine {
                 break;
         }
     }
-
     private boolean passwordVerify(String string) {
         engine = new SpeakerEngine();
         if (string.equals("1523")) {
@@ -65,29 +70,27 @@ public class ARSEngine {
             return false;
         }
     }
-
     private int menuSelected(String string) {
         engine = new SpeakerEngine();
-        if(Integer.parseInt(string) > 0 && Integer.parseInt(string) < 3) {
+        if(DeviceEngine.isInList(Integer.parseInt(string))) {
             return Integer.parseInt(string);
         } else {
             engine.execute("등록되지 않은 번호입니다. 다시 입력해주세요");
             return -1;
         }
     }
-
     private boolean doControl(String string) {
         if(passwordVerify(string)) {
+            DeviceEngine.controlDevices(selected);
             return true;
         } else {
             return false;
         }
     }
-
     private String getDevices() {
-        return "1번 TV, 2번 선풍기, 3번 TV전원";
+        DeviceEngine.refreshDevices();
+        return DeviceEngine.deviceList();
     }
-
     public void muteEngine() {
         engine.stop_speaker();
     }

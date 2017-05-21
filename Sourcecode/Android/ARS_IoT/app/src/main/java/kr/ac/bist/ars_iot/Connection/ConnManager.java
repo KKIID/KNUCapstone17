@@ -17,7 +17,7 @@ import java.net.URL;
 
 public class ConnManager extends AsyncTask<String, Void, String> {
     public static final String main_url = "http://bist.knu.ac.kr:9191/";
-    public static final String log_url = "devs/";
+    public static final String dev_url = "devs/";
 
     private HttpURLConnection conn;
     private String result;
@@ -40,6 +40,13 @@ public class ConnManager extends AsyncTask<String, Void, String> {
             case "POST" :
                 try {
                     result = doPost(conn, params[2]);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "PUT" :
+                try {
+                    result = doPut(conn, params[2]);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -69,6 +76,28 @@ public class ConnManager extends AsyncTask<String, Void, String> {
         conn.setDoInput(true);
         conn.setDoOutput(true);
         conn.setRequestMethod("POST");
+
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(param);
+
+        OutputStreamWriter outStream = new OutputStreamWriter(conn.getOutputStream(),"EUC-KR");
+        PrintWriter writer = new PrintWriter(outStream);
+        writer.write(buffer.toString());
+        writer.flush();
+
+        InputStreamReader inputStream = new InputStreamReader(conn.getInputStream(),"EUC-KR");
+        BufferedReader reader = new BufferedReader(inputStream);
+        StringBuilder builder = new StringBuilder();
+        String str;
+        while((str=reader.readLine())!=null){
+            builder.append(str+"\n");
+        }
+        return builder.toString();
+    }
+    private String doPut(HttpURLConnection conn, String param) throws Exception {
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+        conn.setRequestMethod("PUT");
 
         StringBuffer buffer = new StringBuffer();
         buffer.append(param);
