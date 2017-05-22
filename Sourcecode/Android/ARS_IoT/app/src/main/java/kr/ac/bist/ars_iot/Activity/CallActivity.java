@@ -2,8 +2,11 @@ package kr.ac.bist.ars_iot.Activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import kr.ac.bist.ars_iot.Connection.ConnManager;
@@ -12,16 +15,17 @@ import kr.ac.bist.ars_iot.Engine.SpeakerEngine;
 import kr.ac.bist.ars_iot.R;
 
 public class CallActivity extends AppCompatActivity implements View.OnClickListener{
-    private TextView call_text, call_ctrl;
-    private Button call_1, call_2, call_3, call_4, call_5, call_6, call_7, call_8, call_9, call_0, call_s, call_n, call_exit;
+    private TextView call_ctrl;
+    private Button call_1, call_2, call_3, call_4, call_5, call_6, call_7, call_8, call_9, call_0, call_s, call_n;
     private String btn_buffer = "";
+    private ImageButton call_exit;
     ARSEngine arsEngine;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_call);
-        Bundle ext = getIntent().getExtras();
-        preSetting(ext.getString("phone"));
+        preSetting();
         arsEngine = new ARSEngine();
         arsEngine.nextStep();
     }
@@ -33,50 +37,50 @@ public class CallActivity extends AppCompatActivity implements View.OnClickListe
 
         switch(v.getId()) {
             case R.id.call_1:
-                call_ctrl.append("1");
+                append("1");
                 btn_buffer+="1";
                 break;
             case R.id.call_2:
-                call_ctrl.append("2");
+                append("2");
                 btn_buffer+="2";
                 break;
             case R.id.call_3:
-                call_ctrl.append("3");
+                append("3");
                 btn_buffer+="3";
                 break;
             case R.id.call_4:
-                call_ctrl.append("4");
+                append("4");
                 btn_buffer+="4";
                 break;
             case R.id.call_5:
-                call_ctrl.append("5");
+                append("5");
                 btn_buffer+="5";
                 break;
             case R.id.call_6:
-                call_ctrl.append("6");
+                append("6");
                 btn_buffer+="6";
                 break;
             case R.id.call_7:
-                call_ctrl.append("7");
+                append("7");
                 btn_buffer+="7";
                 break;
             case R.id.call_8:
-                call_ctrl.append("8");
+                append("8");
                 btn_buffer+="8";
                 break;
             case R.id.call_9:
-                call_ctrl.append("9");
+                append("9");
                 btn_buffer+="9";
                 break;
             case R.id.call_0:
-                call_ctrl.append("0");
+                append("0");
                 btn_buffer+="0";
                 break;
             case R.id.call_s:
-                call_ctrl.append("*");
+                append("*");
                 break;
             case R.id.call_n:
-                call_ctrl.append("#");
+                append("#");
                 arsEngine.doStep(btn_buffer);
                 btn_buffer = "";
                 break;
@@ -85,8 +89,13 @@ public class CallActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
-    public void preSetting(String string) {
-        call_text = (TextView)findViewById(R.id.call_text);
+
+    public void append(String s) {
+        String text = call_ctrl.getText() + s;
+        String ellipsizeStr = TextUtils.ellipsize(text, call_ctrl.getPaint(), call_ctrl .getWidth(), TextUtils.TruncateAt.START).toString();
+        call_ctrl.setText(ellipsizeStr);
+    }
+    public void preSetting() {
         call_ctrl = (TextView)findViewById(R.id.call_ctrl);
         call_1 = (Button)findViewById(R.id.call_1);
         call_2 = (Button)findViewById(R.id.call_2);
@@ -100,10 +109,8 @@ public class CallActivity extends AppCompatActivity implements View.OnClickListe
         call_0 = (Button)findViewById(R.id.call_0);
         call_s = (Button)findViewById(R.id.call_s);
         call_n = (Button)findViewById(R.id.call_n);
-        call_exit = (Button)findViewById(R.id.call_exit);
+        call_exit = (ImageButton) findViewById(R.id.call_exit);
 
-
-        call_text.append(string);
         call_1.setOnClickListener(this);
         call_2.setOnClickListener(this);
         call_3.setOnClickListener(this);

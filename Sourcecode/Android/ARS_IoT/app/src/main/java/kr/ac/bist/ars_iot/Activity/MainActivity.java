@@ -10,7 +10,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,12 +37,14 @@ import kr.ac.bist.ars_iot.R;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
     TextView dial_text;
-    Button dial_1, dial_2, dial_3, dial_4, dial_5, dial_6, dial_7, dial_8, dial_9, dial_0, dial_s, dial_n, dial_call, dial_del;
+    Button dial_1, dial_2, dial_3, dial_4, dial_5, dial_6, dial_7, dial_8, dial_9, dial_0, dial_s, dial_n;
+    ImageButton dial_call, dial_del;
     int dial_length=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
         preSetting();
 
@@ -176,8 +180,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dial_0 = (Button)findViewById(R.id.dial_0);
         dial_s = (Button)findViewById(R.id.dial_s);
         dial_n = (Button)findViewById(R.id.dial_n);
-        dial_call = (Button)findViewById(R.id.dial_call);
-        dial_del = (Button)findViewById(R.id.dial_del);
+        dial_call = (ImageButton) findViewById(R.id.dial_call);
+        dial_del = (ImageButton)findViewById(R.id.dial_del);
 
         dial_1.setOnClickListener(this);
         dial_2.setOnClickListener(this);
