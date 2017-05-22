@@ -4,26 +4,92 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="kr.ac.knu.bist.wheather_parse.MapActivity">
-
-    <LinearLayout
-        android:id="@+id/mapLinearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical" />
+    tools:context="kr.ac.knu.bist.wheather_parse.Activity.MapActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_weight="1">
-        <TextView
+        android:layout_height="match_parent"
+        android:layout_weight="6"
+        android:orientation="vertical">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="현재 위치"
-            android:textAlignment="center"
-            android:id="@+id/locationText"/>
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_weight="1">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="집 위치 설정"
+                android:textSize="20dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal">
+                <EditText
+                    android:id="@+id/edit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="10"
+                    android:textAlignment="center"
+                    android:text="주소 입력"
+                    android:inputType="text"/>
+                <Button
+                    android:id="@+id/sbtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="검색" />
+
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_gravity="center">
+            <TextView
+                android:id="@+id/locationText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="현재 위치"
+                android:textSize="15dp"
+                android:textAlignment="center" />
+            <TextView
+                android:layout_width="match_parent"
+                android:textSize="15dp"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="현재 위치를 확인해주세요.\n지도에서 핀을 움직여 세부 위치를 지정할 수 있습니다."/>
+        </LinearLayout>
+
     </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="4"><!--안에 있는 레이아웃 빼면 지도 안열림 지우기 ㄴㄴ-->
+
+        <RelativeLayout
+            android:id="@+id/mapLinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+        </RelativeLayout>
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="40dp"
+            android:layout_height="35dp"
+            android:background="#00000000"
+            android:scaleType="fitXY"
+            android:src="@drawable/maps_location_icon"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="36dp" />
+
+    </RelativeLayout>
 
 
 </LinearLayout>

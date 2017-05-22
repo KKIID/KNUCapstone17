@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="kr.ac.knu.bist.wheather_parse.MainActivity">
+    tools:context="kr.ac.knu.bist.wheather_parse.Activity.MainActivity">
 
     <TextView
         android:layout_width="wrap_content"

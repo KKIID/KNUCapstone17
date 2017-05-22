@@ -1,17 +1,22 @@
-package kr.ac.knu.bist.wheather_parse;
+package kr.ac.knu.bist.wheather_parse.Activity;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nhn.android.maps.NMapActivity;
 import com.nhn.android.maps.NMapCompassManager;
 import com.nhn.android.maps.NMapController;
-import com.nhn.android.maps.NMapItemizedOverlay;
 import com.nhn.android.maps.NMapLocationManager;
 import com.nhn.android.maps.NMapOverlay;
 import com.nhn.android.maps.NMapOverlayItem;
@@ -26,8 +31,11 @@ import com.nhn.android.mapviewer.overlay.NMapMyLocationOverlay;
 import com.nhn.android.mapviewer.overlay.NMapOverlayManager;
 import com.nhn.android.mapviewer.overlay.NMapPOIdataOverlay;
 
-import kr.ac.knu.bist.wheather_parse.Permission.LocationParse;
-import kr.ac.knu.bist.wheather_parse.Permission.NMapViewerResourceProvider;
+import kr.ac.knu.bist.wheather_parse.Interface.InterfaceBinding;
+import kr.ac.knu.bist.wheather_parse.NaverMap.NMapPOIflagType;
+import kr.ac.knu.bist.wheather_parse.DataRequest.LocationParse;
+import kr.ac.knu.bist.wheather_parse.NaverMap.NMapViewerResourceProvider;
+import kr.ac.knu.bist.wheather_parse.R;
 
 public class MapActivity extends NMapActivity implements InterfaceBinding {
     private NMapView mMapView;// 지도 화면 View
@@ -40,10 +48,12 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
     private NMapViewerResourceProvider nMapViewerResourceProvider;
     private NMapOverlayManager nMapOverlayManager;
     private NMapPOIdata poIdata;
-    private LinearLayout mapLinearLayout;
+    private RelativeLayout mapLinearLayout;
     private TextView locationTextView;
     private NMapPOIitem item;
     private LocationParse locationParse;
+    private ImageButton getLocationButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,16 +61,24 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
         setContentView(R.layout.activity_map);
         createObject();
         setMapView();/*MapView Setting*/
-        mapLinearLayout = (LinearLayout)findViewById(R.id.mapLinearLayout);
+        getLocationButton = (ImageButton)findViewById(R.id.imageButton);
+        mapLinearLayout = (RelativeLayout) findViewById(R.id.mapLinearLayout);
         locationTextView = (TextView)findViewById(R.id.locationText);
-        if(nMapLocationManager.enableMyLocation(true)){/*현재 위치 불러오기*/
-        }else{
-        }
+        nMapLocationManager.enableMyLocation(true);/*현재 위치 불러오기*/
         /*create my location overlay*/
         nMapMyLocationOverlay = nMapOverlayManager.createMyLocationOverlay(nMapLocationManager,nMapCompassManager);
         mapLinearLayout.addView(mMapView);
         nGeoPoint = mapController.getMapCenter();
         nMapLocationManager.setOnLocationChangeListener(this);
+        locationParse();/*사용자가 검색을 하면 수행되어야 함*/
+        getLocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //mapController.setMapCenter(nGeoPoint.longitude, nGeoPoint.latitude);
+            }
+        });
+    }
+    public void locationParse(){
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -84,12 +102,14 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
         mMapView.requestFocus();
         mMapView.setOnMapStateChangeListener(this);/*맵의 상태가 바뀌면 호출*/
         mMapView.setBuiltInZoomControls(true, null);
+        //mMapView.setBuiltInAppControl(true);/*네이버 지도 앱 실행 버튼 생성*/
     }
 
     public void createMarker(double lat, double lon){/*마커생성*/
         Log.d("TAG","create Marker");
         Log.d("TAG","Location"+lat+"/"+lon);
         int markerId = NMapPOIflagType.PIN;
+        int markerId2 = NMapPOIflagType.SPOT;
         poIdata = new NMapPOIdata(1, nMapViewerResourceProvider);
         poIdata.beginPOIdata(1);
         item = poIdata.addPOIitem(lon, lat, "현재 위치", markerId, 0);
