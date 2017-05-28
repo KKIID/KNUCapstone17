@@ -4,79 +4,171 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="kr.ac.knu.bist.wheather_parse.Activity.MapActivity">
+    tools:context="kr.ac.knu.bist.wheather_parse.Activity.MapActivity"
+    android:weightSum="10">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="6"
-        android:orientation="vertical">
+        android:layout_height="0dp"
+        android:layout_weight="2.7"
+        android:orientation="vertical"
+        android:weightSum="10">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:layout_weight="1">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="집 위치 설정"
-                android:textSize="20dp"/>
+            android:layout_weight="4"
+            android:weightSum="7"
+
+            >
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:orientation="horizontal">
-                <EditText
-                    android:id="@+id/edit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="10"
-                    android:textAlignment="center"
-                    android:text="주소 입력"
-                    android:inputType="text"/>
-                <Button
-                    android:id="@+id/sbtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="2"
+                android:orientation="horizontal"
+                android:weightSum="7">
+                <TextView
+                    android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:text="검색" />
+                    android:layout_height="match_parent"
+                    android:background="@drawable/myhome"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="7dp"/>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="5"></LinearLayout>
+                <ImageButton
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/save"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginRight="7dp"
+                    android:id="@+id/save"/>
 
             </LinearLayout>
+
+
+
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:orientation="horizontal"
+                android:weightSum="10"
+                android:layout_weight="5"
+                android:background="@drawable/box"
+                >
+
+                <EditText
+                    android:id="@+id/edit"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="8.5"
+                    android:textAlignment="center"
+                    android:hint="지번주소 혹은 도로명주소를 입력하세요"
+                    android:inputType="text"
+                    android:background="@null"
+                    />
+                <ImageButton
+                    android:id="@+id/sbtn"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.5"
+                    android:background="@drawable/serachicon"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="10dp"
+
+                    />
+
+
+            </LinearLayout>
+
         </LinearLayout>
+
+
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_weight="6"
             android:orientation="vertical"
-            android:layout_gravity="center">
+            android:layout_gravity="center"
+            android:gravity="top"
+            android:weightSum="2">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="0.8"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                >
+
+                <ImageView
+                    android:id="@+id/imageView1"
+                    android:layout_width="12dp"
+                    android:layout_height="10dp"
+                    android:background="@drawable/homeicon"
+                    android:layout_gravity="center"
+                    />
+
+                <TextView
+                    android:id="@+id/locationText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="현재 위치"
+                    android:textAlignment="center"
+                    android:gravity="center_vertical"
+                    android:layout_gravity="center"
+                    />
+                <ImageView
+                    android:id="@+id/imageView2"
+                    android:layout_width="12dp"
+                    android:layout_height="10dp"
+                    android:background="@drawable/homeicon"
+                    android:layout_gravity="center"
+                    />
+            </LinearLayout>
+
+
+
+
             <TextView
-                android:id="@+id/locationText"
+                android:id="@+id/textView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="현재 위치"
-                android:textSize="15dp"
-                android:textAlignment="center" />
-            <TextView
-                android:layout_width="match_parent"
-                android:textSize="15dp"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
+                android:text="현재 위치를 확인해주세요.\n지도에서 핀을 움직여 세부 위치를 지정할 수 있습니다."
                 android:textAlignment="center"
-                android:text="현재 위치를 확인해주세요.\n지도에서 핀을 움직여 세부 위치를 지정할 수 있습니다."/>
+                android:layout_weight="1.2"
+                />
+
         </LinearLayout>
 
     </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.3"></LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="4"><!--안에 있는 레이아웃 빼면 지도 안열림 지우기 ㄴㄴ-->
+        android:layout_height="0dp"
+        android:layout_weight="7"><!--안에 있는 레이아웃 빼면 지도 안열림 지우기 ㄴㄴ-->
+
 
         <RelativeLayout
             android:id="@+id/mapLinearLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true">
         </RelativeLayout>
         <ImageButton
             android:id="@+id/imageButton"

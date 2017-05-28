@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:fitsSystemWindows="true"
+tools:context="kr.ac.knu.bist.wheather_parse.Activity.MainActivity">
+
+
+
+<android.support.design.widget.AppBarLayout
+    android:id="@+id/app_bar"
+    android:layout_width="match_parent"
+    android:layout_height="300dp"
+    android:fitsSystemWindows="true"
+    android:theme="@style/AppTheme.AppBarOverlay">
+
+    <android.support.design.widget.CollapsingToolbarLayout
+        android:id="@+id/toolbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        app:contentScrim="?attr/colorPrimary"
+        app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="280dp"
+            android:background="@drawable/sky"
+            android:orientation="vertical">
+
+            <GridLayout
+                android:id="@+id/gridlayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="85dp"
+                android:columnCount="4"
+                android:orientation="horizontal"
+                android:rowCount="2">
+
+                <TextView
+                    android:id="@+id/outsideAir"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:text="실외공기" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:text="현재온도" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:text="현재습도" />
+
+                <TextView
+                    android:id="@+id/currentWeather"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:text="현재날씨" />
+                />
+
+                <com.github.lzyzsd.circleprogress.CircleProgress
+
+                    android:id="@+id/airCondition"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="5dp"
+                    android:gravity="center"
+                    app:circle_text_size="10dp" />
+
+                <com.github.lzyzsd.circleprogress.CircleProgress
+                    android:id="@+id/tempProgress"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="5dp"
+                    android:gravity="center"
+                    app:circle_text_size="10dp" />
+
+                <com.github.lzyzsd.circleprogress.CircleProgress
+                    android:id="@+id/humProgress"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="5dp"
+                    android:gravity="center"
+                    app:circle_progress="0"
+                    app:circle_text_size="10dp" />
+
+                <android.support.v7.widget.AppCompatImageView
+                    android:id="@+id/weatherIcon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="5dp" />
+
+            </GridLayout>
+
+            <ImageView
+                android:id="@+id/homeIconView"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_below="@id/gridlayout"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="5dp"
+                android:background="#00000000"
+                android:src="@drawable/homeicon" />
+
+            <TextView
+                android:id="@+id/weatherLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/gridlayout"
+                android:layout_marginTop="5dp"
+                android:layout_toRightOf="@id/homeIconView" />
+
+            <TextView
+                android:id="@+id/weatherTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/homeIconView"
+                android:layout_marginLeft="10dp" />
+
+            <ImageView
+                android:id="@+id/skplanetImage"
+                android:layout_width="60dp"
+                android:layout_height="15dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:scaleType="fitXY"
+                android:src="@drawable/skplanet" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:paddingBottom="15dp">
+
+                <Button
+                    android:id="@+id/button1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="#00000000"
+                    android:text="음성인식"
+                    android:textColor="#FFFFFF" />
+
+                <Button
+                    android:id="@+id/button2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="#00000000"
+                    android:text="스마트 모드"
+                    android:textColor="#FFFFFF" />
+
+                <Button
+                    android:id="@+id/button3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="#00000000"
+                    android:text="기기관리"
+                    android:textColor="#FFFFFF" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_collapseMode="pin"
+            app:popupTheme="@style/AppTheme.PopupOverlay"/>
+    </android.support.design.widget.CollapsingToolbarLayout>
+
+</android.support.design.widget.AppBarLayout>
+
+<include layout="@layout/content_scrolling" />
+
+</android.support.design.widget.CoordinatorLayout>

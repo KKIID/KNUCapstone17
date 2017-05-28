@@ -28,8 +28,16 @@ public class weatherParse {
     private ArrayList<String> sunState;
 
     public weatherParse(String lat/*위도*/, String lon/*경도*/) {
+        Log.d("TAG","weather parse 위도 경도"+lat+"/"+lon);
+        if(lat==null || lat.equals("")){/*어플 첫실행 시 위치가 없을 때 사용.*/
+            lat = "37.56667";
+        }
+        if(lon==null || lon.equals("")){
+            lon = "126.97806";
+        }
         this.lat = lat;
         this.lon = lon;
+
         URL = URL.replace("{version}", "1");
         URL = URL.replace("{lat}", lat);
         URL = URL.replace("{lon}", lon);
@@ -47,7 +55,7 @@ public class weatherParse {
         conn = (HttpURLConnection) url3.openConnection();
         //conn.setUseCaches(false);
         conn.setRequestMethod("GET");
-        conn.setRequestProperty("appKey", "d516030a-f736-3cbe-bf29-21247b5e7dd7");
+        conn.setRequestProperty("appKey", "68f4b112-084d-3520-8ca6-95139ff14683");
 
         int resCode = 0;
         resCode = conn.getResponseCode();
@@ -82,7 +90,7 @@ public class weatherParse {
         conn = (HttpURLConnection) url2.openConnection();
         //conn.setUseCaches(false);
         conn.setRequestMethod("GET");
-        conn.setRequestProperty("appKey", "d516030a-f736-3cbe-bf29-21247b5e7dd7");
+        conn.setRequestProperty("appKey", "68f4b112-084d-3520-8ca6-95139ff14683");
 
         int resCode = 0;
         resCode = conn.getResponseCode();
@@ -112,7 +120,7 @@ public class weatherParse {
         conn = (HttpURLConnection) url.openConnection();
         //conn.setUseCaches(false);
         conn.setRequestMethod("GET");
-        conn.setRequestProperty("appKey", "d516030a-f736-3cbe-bf29-21247b5e7dd7");
+        conn.setRequestProperty("appKey", "68f4b112-084d-3520-8ca6-95139ff14683");
 
         int resCode = 0;
         resCode = conn.getResponseCode();
@@ -129,11 +137,12 @@ public class weatherParse {
             sb.append(input);
             jsonObject = new JSONObject(input);
         }
+
         jsonObject = jsonObject.getJSONObject("weather").getJSONArray("hourly").getJSONObject(0);
-        weatherState.add(jsonObject.getJSONObject("wind").getString("wdir"));/*풍향*/
-        weatherState.add(jsonObject.getJSONObject("wind").getString("wspd"));/*풍속*/
-        weatherState.add(jsonObject.getJSONObject("precipitation").getString("type"));/*강수형태코드 - 0: 현상없음 - 1: 비 - 2: 비/눈 - 3: 눈*/
-        weatherState.add(jsonObject.getJSONObject("precipitation").getString("sinceOntime"));/*1시간 누적 강수량 - if type=0/1/2 → 강우량 (mm) - if type=3     → 적설량 (cm)*/
+        weatherState.add(jsonObject.getJSONObject("wind").getString("wdir"));/*0풍향*/
+        weatherState.add(jsonObject.getJSONObject("wind").getString("wspd"));/*1풍속*/
+        weatherState.add(jsonObject.getJSONObject("precipitation").getString("type"));/*2강수형태코드 - 0: 현상없음 - 1: 비 - 2: 비/눈 - 3: 눈*/
+        weatherState.add(jsonObject.getJSONObject("precipitation").getString("sinceOntime"));/*31시간 누적 강수량 - if type=0/1/2 → 강우량 (mm) - if type=3     → 적설량 (cm)*/
         weatherState.add(jsonObject.getJSONObject("sky").getString("name"));
             /*하늘상태코드명
             - SKY_O01: 맑음
@@ -156,6 +165,10 @@ public class weatherParse {
         weatherState.add(jsonObject.getString("humidity"));/*상대 습도*/
         weatherState.add(jsonObject.getString("lightning"));/*낙뢰 유무*/
         weatherState.add(jsonObject.getString("timeRelease"));/*발표 시간*/
+        weatherState.add(jsonObject.getJSONObject("grid").getString("city"));/*11*/
+        weatherState.add(jsonObject.getJSONObject("grid").getString("county"));/*12*/
+        weatherState.add(jsonObject.getJSONObject("grid").getString("village"));/*13*/
+        weatherState.add(jsonObject.getJSONObject("sky").getString("code"));/*14*/
         return weatherState;
     }
     class NotiDate {

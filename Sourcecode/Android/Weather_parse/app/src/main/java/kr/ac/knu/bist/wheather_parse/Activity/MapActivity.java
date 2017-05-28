@@ -1,15 +1,20 @@
 package kr.ac.knu.bist.wheather_parse.Activity;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.LayoutInflater;
+import android.view.KeyEvent;
 import android.view.View;
-import android.widget.FrameLayout;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,17 +36,29 @@ import com.nhn.android.mapviewer.overlay.NMapMyLocationOverlay;
 import com.nhn.android.mapviewer.overlay.NMapOverlayManager;
 import com.nhn.android.mapviewer.overlay.NMapPOIdataOverlay;
 
+import java.util.ArrayList;
+
 import kr.ac.knu.bist.wheather_parse.Interface.InterfaceBinding;
 import kr.ac.knu.bist.wheather_parse.NaverMap.NMapPOIflagType;
 import kr.ac.knu.bist.wheather_parse.DataRequest.LocationParse;
 import kr.ac.knu.bist.wheather_parse.NaverMap.NMapViewerResourceProvider;
+import kr.ac.knu.bist.wheather_parse.NaverMap.searchBuffer;
 import kr.ac.knu.bist.wheather_parse.R;
 
+
 public class MapActivity extends NMapActivity implements InterfaceBinding {
+
+
+    private ImageButton sbtn, searchMyLocation;
+    private EditText addressEdit;
+    private ArrayList<searchBuffer> search;
+    private int itemNbr;
+    private String[] items;
+    private ImageButton locationSave;
     private NMapView mMapView;// 지도 화면 View
     private final String CLIENT_ID = "ew6Z1LJo5gxRQGKHrAXM";// 애플리케이션 클라이언트 아이디 값
     private NMapLocationManager nMapLocationManager;
-    private NGeoPoint nGeoPoint;
+    private NGeoPoint nGeoPoint, myGeoPoint, currnetGeopoint;
     private NMapController mapController;
     private NMapCompassManager nMapCompassManager;
     private NMapMyLocationOverlay nMapMyLocationOverlay;
@@ -52,44 +69,197 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
     private TextView locationTextView;
     private NMapPOIitem item;
     private LocationParse locationParse;
-    private ImageButton getLocationButton;
-
+    private SharedPreferences preferences;
+    private SharedPreferences.Editor editor;
+    private searchBuffer myLocationPoint;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         super.setMapDataProviderListener(this);
         setContentView(R.layout.activity_map);
+
         createObject();
         setMapView();/*MapView Setting*/
-        getLocationButton = (ImageButton)findViewById(R.id.imageButton);
-        mapLinearLayout = (RelativeLayout) findViewById(R.id.mapLinearLayout);
-        locationTextView = (TextView)findViewById(R.id.locationText);
+
+
+        connectXml();
+
         nMapLocationManager.enableMyLocation(true);/*현재 위치 불러오기*/
+
         /*create my location overlay*/
         nMapMyLocationOverlay = nMapOverlayManager.createMyLocationOverlay(nMapLocationManager,nMapCompassManager);
         mapLinearLayout.addView(mMapView);
         nGeoPoint = mapController.getMapCenter();
         nMapLocationManager.setOnLocationChangeListener(this);
-        locationParse();/*사용자가 검색을 하면 수행되어야 함*/
-        getLocationButton.setOnClickListener(new View.OnClickListener() {
+
+        /*save키 클릭 시 location 저장*/
+        locationSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MapActivity.this);
+                builder.setTitle("주소 저장");
+                builder.setMessage("선택하신 주소가 " + myLocationPoint.getAddress() + " 이(가) 맞습니까?");
+                builder.setPositiveButton("저장", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        deleteLocation();/*기존 것을 삭제하고 저장*/
+                        saveLocation(myLocationPoint.getSearchX(),myLocationPoint.getSearchY());
+
+                        Intent intent = new Intent(MapActivity.this,MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                }).setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+                builder.show();
+            }
+        });
+
+        addressEdit.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        addressEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if(actionId==EditorInfo.IME_ACTION_DONE)
+                {
+                    addressSearch();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        searchMyLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //mapController.setMapCenter(nGeoPoint.longitude, nGeoPoint.latitude);
+                Log.d("TAG","searchMyLocation");
+                mapController.setMapCenter(currnetGeopoint);
+                mapController.setZoomLevel(11);
+                item.setPoint(currnetGeopoint);
+            }
+        });
+
+        //검색버튼 클릭시 이벤트
+        sbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("TAG","click");
+                addressSearch();
+                mapController.setZoomLevel(11);
             }
         });
     }
-    public void locationParse(){
+
+    public void connectXml(){
+        sbtn =(ImageButton) findViewById(R.id.sbtn);
+        addressEdit=(EditText)findViewById(R.id.edit);
+        locationSave=(ImageButton)findViewById(R.id.save);
+        searchMyLocation = (ImageButton)findViewById(R.id.imageButton);
+        mapLinearLayout = (RelativeLayout) findViewById(R.id.mapLinearLayout);
+        locationTextView = (TextView)findViewById(R.id.locationText);
+    }
+
+    private void addressSearch(){/*검색 기능*/
+        if ( addressEdit.getText().toString().length() == 0 ) {
+                    /*주소 입력이 공백일 때 처리할 내용*/
+            Toast.makeText(getApplicationContext(),"주소를 입력해 주세요.",Toast.LENGTH_LONG).show();
+            //Log.d("TAG","공백OK");
+        } else {
+            if(item ==null){
+                        /*만약 마커가 없으면 마커를 임시로 생성.*/
+                createMarker(30,30);
+            }
+                    /*검색 버튼을 누르면 키보드를 숨김.*/
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(addressEdit.getWindowToken(), 0);
+
+                    /*주소 입력이 공백이 아닐 때 주소에 대한 정보 ReQuest보내기 */
+            locationParse(addressEdit.getText().toString());
+
+            //mapController.setMapCenter(search.getSearchX(),search.getSearchY());
+            //NGeoPoint temppoint = new NGeoPoint(search.getSearchX(),search.getSearchY());
+            if(search==null){ /*잘못된 주소를 입력 했을 때 (예시) 없는 주소, 이상한 문자*/
+                Toast.makeText(getApplicationContext(),"주소를 정확히 입력해 주세요.",Toast.LENGTH_LONG).show();
+
+            }else if(search.size()==1){ /*입력된 값이 하나의 주소만을 찾았을 때*/
+                locationTextView.setText(search.get(0).getAddress());
+                            /*그 주소로 map접근*/
+                mapController.setZoomLevel(10);
+                mapController.setMapCenter(search.get(0).getSearchX(),search.get(0).getSearchY());
+                NGeoPoint tempPoint = new NGeoPoint(search.get(0).getSearchX(),search.get(0).getSearchY());
+                myLocationPoint = new searchBuffer(search.get(0).getSearchX(),search.get(0).getSearchY(),search.get(0).getAddress());
+                item.setPoint(tempPoint);
+            }
+            else{ /*입력된 값이 여러개의 주소를 찾았을 때*/
+                locationSelectDialog(search);
+                Toast.makeText(getApplicationContext(),"여러개의 주소가 검색",Toast.LENGTH_LONG).show();
+            }
+            //item.setPoint(temppoint);
+            //Log.d("TAG","in Button x:"+search.getSearchX()+"y:"+search.getSearchY());
+        }
+
+    }
+
+    private void locationSelectDialog(final ArrayList<searchBuffer> search){/*여러개의 주소가 검색될 경우 선택하도록 하는 Dialog*/
+
+        items = new String[search.size()];
+
+        for(int i=0;i<search.size();i++){
+            items[i] = search.get(i).getAddress();
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(MapActivity.this);
+        builder.setTitle("주소 선택");
+        builder.setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                itemNbr =which;
+            }
+        });
+        builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                locationTextView.setText(items[itemNbr]);
+                /*검색한 위치로 mapCenter를 변경*/
+                mapController.setZoomLevel(10);
+                mapController.setMapCenter(search.get(itemNbr).getSearchX(),search.get(itemNbr).getSearchY());
+                NGeoPoint tempPoint = new NGeoPoint(search.get(itemNbr).getSearchX(),search.get(itemNbr).getSearchY());
+                myLocationPoint = new searchBuffer(search.get(itemNbr).getSearchX(),search.get(itemNbr).getSearchY(),search.get(itemNbr).getAddress());
+                item.setPoint(tempPoint);
+            }
+        });
+        builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+    }
+
+    //검색한 주소의 위치 좌표로 받아오기
+    public void locationParse(final String address){
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    locationParse.getLocation();
+                    Log.d("TAG","address ="+address);
+                    search=locationParse.getLocation(address);
+//                    for(int i=0;i<search.size();i++)
+//                    Log.d("TAG","넘어온 값 ="+search.get(i).getSearchX() + search.get(i).getSearchY()+ search.get(i).getAddress());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
         t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setMapView(){
@@ -152,14 +322,18 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
         Log.d("TAG", nGeoPoint.getLatitude() + "/" + nGeoPoint.getLongitude());
         /*나중에 이 액티비티에서 수정을 하면 아래의 동작을 수행하도록 변경하여야 함.*/
     }
-    public void saveLocation(){
-        SharedPreferences preferences = getSharedPreferences("LOCATION",0);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.clear();
+    public void saveLocation(double logitude, double latitude){
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        editor = preferences.edit();
+        editor.putString("LATITUDE",latitude+"");
+        editor.putString("LONGITUDE",logitude+"");
         editor.commit();
-        editor.putString("LATITUDE",nGeoPoint.getLatitude()+"");
-        editor.putString("LONGITUDE",nGeoPoint.getLongitude()+"");
-        editor.commit();
+    }
+    public void deleteLocation(){
+        if(editor!=null) {
+            editor.remove("Location");
+            editor.commit();
+        }
     }
     @Override
     public void onMapCenterChangeFine(NMapView nMapView) {
@@ -183,12 +357,14 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
     }
 
     @Override
-    public boolean onLocationChanged(NMapLocationManager nMapLocationManager, NGeoPoint nGeoPoint) {
+    public boolean onLocationChanged(NMapLocationManager nMapLocationManager, NGeoPoint nGeoPoint) {/*나의 현재위치가 바뀔 경우 호출됨*/
         Log.d("TAG", "onLocationChanged");
         if (nMapLocationManager.isMyLocationFixed()) {
             Log.d("TAG", "변경됨");
             mapController.setMapCenter(nGeoPoint.longitude, nGeoPoint.latitude);
             nGeoPoint = mapController.getMapCenter();
+            currnetGeopoint = nGeoPoint;
+            myLocationPoint = new searchBuffer(nGeoPoint.longitude,nGeoPoint.latitude,"");
             createMarker(nGeoPoint.getLatitude(),nGeoPoint.getLongitude());
         } else {
             Log.d("TAG", "변경안됨");
@@ -213,7 +389,8 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
             return;
         }
         locationTextView.setText(nMapPlacemark.toString());
-        item.setTitle("현재 위치:"+nMapPlacemark.toString());/*마커 아이템 수정*/
+        item.setTitle("현재 위치");/*마커 아이템 수정*/
+        myLocationPoint = new searchBuffer(myGeoPoint.getLongitude(),myGeoPoint.getLatitude(),nMapPlacemark.toString());
     }
 
     @Override
@@ -223,7 +400,8 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
         /*좌표를 주소로 변환하는 메소드*/
         /*onReverseGeocoderResponse : CallBack Method 참고*/
         findPlacemarkAtLocation(point.getLongitude(),point.getLatitude());
-        saveLocation();
+        Log.d("TAG","저장될 위도 경도"+point.getLongitude()+"/"+point.getLatitude());
+        myGeoPoint=point;
 
     }
 }
