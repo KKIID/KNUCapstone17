@@ -13,7 +13,6 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ListView;
 
@@ -22,7 +21,7 @@ import com.nhn.android.maps.overlay.NMapPOIitem;
 import com.nhn.android.mapviewer.overlay.NMapCalloutCustomOverlay;
 import com.nhn.android.mapviewer.overlay.NMapResourceProvider;
 
-import kr.ac.knu.bist.wheather_parse.NMapPOIflagType;
+import kr.ac.knu.bist.wheather_parse.NaverMap.NMapPOIflagType;
 import kr.ac.knu.bist.wheather_parse.R;
 
 /**

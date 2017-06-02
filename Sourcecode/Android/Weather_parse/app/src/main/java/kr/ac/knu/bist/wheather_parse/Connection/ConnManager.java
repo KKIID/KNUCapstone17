@@ -21,7 +21,7 @@ import java.net.URL;
  */
 
 public class ConnManager extends AsyncTask<String, Void, String> {
-    public static final String main_url = "http://155.230.25.133:9191/";
+    public static final String main_url = "http://155.230.25.138:9191/";
     public static final String dev_url = "devs/";
     public static final String pass_url = "password/";
 
