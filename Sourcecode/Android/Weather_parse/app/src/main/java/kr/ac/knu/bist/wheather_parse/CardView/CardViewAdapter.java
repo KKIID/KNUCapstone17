@@ -31,6 +31,7 @@ public class CardViewAdapter extends RecyclerView.Adapter<CardViewAdapter.ViewHo
         holder.mTextView.setText(mDataset.get(position).text);
         holder.mImageView.setImageResource(mDataset.get(position).img);
         holder.itemView.setOnClickListener(mDataset.get(position).listner);
+        holder.itemView.setOnLongClickListener(mDataset.get(position).longlistener);
     }
 
     @Override

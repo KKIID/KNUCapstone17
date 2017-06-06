@@ -113,18 +113,21 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             }
 
         }
-        builder = new AlertDialog.Builder(ScrollingActivity.mContext);
-        builder.setTitle(remoteMessage.getData().get("title"))
-                .setMessage(remoteMessage.getData().get("body"))
-                .setPositiveButton("확인", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
+        try {
+            builder = new AlertDialog.Builder(ScrollingActivity.mContext);
+            builder.setTitle(remoteMessage.getData().get("title"))
+                    .setMessage(remoteMessage.getData().get("body"))
+                    .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
 
-                        vibrator.cancel();
-                        dialogInterface.dismiss();
-                    }
-                });
-
+                            vibrator.cancel();
+                            dialogInterface.dismiss();
+                        }
+                    });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         // Check if message contains a notification payload.
         if (remoteMessage.getData() != null) {
 

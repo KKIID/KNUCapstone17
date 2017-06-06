@@ -6,8 +6,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -72,6 +75,7 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
     private searchBuffer myLocationPoint;
+    private LocationManager locationManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,7 +83,12 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
         setContentView(R.layout.activity_map);
 
         createObject();
+        /*GPS 설정 뒤에 액티비티 재 질행해야 하는 문제 해결해야함.*/
+        checkOnGPS();//GPS 켜져있는지 체크
+        
+        
         setMapView();/*MapView Setting*/
+        
 
 
         connectXml();
@@ -151,6 +160,15 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
                 mapController.setZoomLevel(11);
             }
         });
+    }
+
+    private void checkOnGPS() {
+        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){//GPS 켜져 있는지 체크
+            Toast.makeText(getApplicationContext(),"GPS 설정을 켜주세요.",Toast.LENGTH_SHORT).show();
+            Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            i.addCategory(Intent.CATEGORY_DEFAULT);
+            startActivity(i);
+        }
     }
 
     public void connectXml(){
@@ -300,6 +318,7 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
         nMapViewerResourceProvider = new NMapViewerResourceProvider(this);
         nMapOverlayManager = new NMapOverlayManager(this,mMapView,nMapViewerResourceProvider);
         mapController = mMapView.getMapController();
+        locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
 
     }
 

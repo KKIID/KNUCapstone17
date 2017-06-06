@@ -1,9 +1,15 @@
 package kr.ac.knu.bist.wheather_parse.Activity;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.NavigationView;
@@ -34,8 +40,13 @@ import com.github.lzyzsd.circleprogress.CircleProgress;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, Button.OnClickListener {
@@ -58,6 +69,9 @@ public class MainActivity extends AppCompatActivity
     private CollapsingToolbarLayout toolbarLayout;
     private DrawerLayout drawer;
     private ConnManager connManager;
+    private SharedPreferences appPreferences;
+    private String moduleName;
+    private BroadcastReceiver broadcastReceiver;
 
     @SuppressLint("NewApi")
     @Override
@@ -65,6 +79,10 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         xmlIdConnection();
+        //저장된 IP 호출
+        connManager = new ConnManager();
+        connManager.setMain_url(appPreferences.getString("key_serverIP",""));
+
 
         /*사실 뭔지 잘모르겠음 ^^ ; 카드뷰 UI 부분임*/
         InitializingUI();
@@ -83,22 +101,131 @@ public class MainActivity extends AppCompatActivity
         myDataset = new ArrayList<>();
         mAdapter = new CardViewAdapter(myDataset);
         mRecyclerView.setAdapter(mAdapter);
-
-        /*기기 목록을 가져와서 add를 해주고 changenotified 해줘야함.*/
-        //아래는 TEST CODE입니다.
-        myDataset.add(new CardViewData("에어컨", R.drawable.airconditioner, new View.OnClickListener() {
+        IntentFilter intentfilter = new IntentFilter();
+        intentfilter.addAction("kr.ac.bist.iot_noti.moduleRegist");
+        refreshModuleList();
+        broadcastReceiver = new BroadcastReceiver() {
             @Override
-            public void onClick(View view) {
-                Toast.makeText(getApplicationContext(),"에어컨 동작 중, 잠시 기다려 주세요.",Toast.LENGTH_SHORT).show();
-                connManager = new ConnManager();
-                String[] params  = {"id","1","status","1"};
-                connManager.execute("PUT",ConnManager.main_url+ConnManager.dev_url,ConnManager.makeParams(params));
-                Toast.makeText(getApplicationContext(),"에어컨 동작 완료.",Toast.LENGTH_SHORT).show();
+            public void onReceive(Context context, Intent intent) {
+                if(intent.getAction().equals("kr.ac.bist.iot_noti.moduleRegist")){
+                    refreshModuleList();
+                }
             }
-        }));
-        mAdapter.notifyDataSetChanged();
+        };
+        registerReceiver(broadcastReceiver, intentfilter);
+
+    }
+    public void refreshModuleList() {
+        myDataset.clear();
+        JSONArray array=null;
+        try {
+            array = parseJSONString(requestJSONString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (array == null) {
+            final Handler mHandler = new Handler();
+            Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                            builder.setCancelable(false).setTitle("에러").setMessage("서버 응답 없음\n서버의 인터넷 연결 유무를 확인하세요").setPositiveButton("종료", new                                        DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            }).show();
+                        }
+                    });
+                }
+            });
+            t.start();
+        } else {
+            for (int i = 0; i < array.length(); i++) {
+                final JSONObject object;
+                try {
+                    final int temp = i;
+                    object = array.getJSONObject(i);
+                    moduleName = object.getString("name");
+                    final int num = object.getInt("id");
+                    int[] icons = {R.drawable.bulb, R.drawable.telev, R.drawable.airconditioner, R.drawable.alert};
+                    int selected;
+                    char code = '0';
+                    switch (moduleName) {
+                        case "전등":
+                            selected = 0;
+                            code = '0';
+                            break;
+                        case "텔레비전":
+                            selected = 1;
+                            code = '1';
+                            break;
+                        case "에어컨":
+                            selected = 2;
+                            code = 'a';
+                            break;
+                        case "선풍기":
+                            selected = 3;
+                            code = '8';
+                            break;
+                        case "오디오":
+                            selected = 3;
+                            code = '5';
+                            break;
+                        case "빔프로젝터":
+                            selected = 3;
+                            code = '1';
+                            break;
+                        default:
+                            selected = 3;
+                            code = '0';
+                    }
+                    final char finalCode = code;
+                    myDataset.add(i,new CardViewData(moduleName, icons[selected],num, code, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            String[] params = {"id", (temp + 1) + "", "status", "1","code", finalCode+""};
+                            moduleOperate(moduleName, params);
+                        }
+                    }, new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            connManager = new ConnManager();
+                            connManager.execute("DELETE",ConnManager.main_url+ConnManager.dev_url+myDataset.get(temp).id);
+                            refreshModuleList();
+                            Toast.makeText(getApplicationContext(),moduleName+" 삭제되었습니다.",Toast.LENGTH_SHORT).show();
+                            return true;
+                        }
+                    }));
 
 
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            mAdapter.notifyDataSetChanged();
+        }
+
+    }
+    public void moduleOperate(String moduleName, String[] params){//String[] params  = {"id","1","status","1"};
+        Toast.makeText(getApplicationContext(),moduleName+" 동작 중, 잠시 기다려 주세요.",Toast.LENGTH_SHORT).show();
+        String result=null;
+        connManager = new ConnManager();
+        try {
+            result = connManager.execute("PUT",ConnManager.main_url+ConnManager.dev_url,ConnManager.makeParams(params)).get();
+            if(result.equals("IOException")|| result.equals("ProtocolException")||result.equals("MalformedURLException")) {
+                Toast.makeText(getApplicationContext(), "동작 실패. IP설정을 확인해주세요.",Toast.LENGTH_SHORT).show();
+            }else{
+                Toast.makeText(getApplicationContext(),moduleName+" 동작 완료.",Toast.LENGTH_SHORT).show();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
     public void InitializingUI(){
         setSupportActionBar(toolbar);
@@ -154,6 +281,9 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent i = new Intent(this, SettingActivity.class);
+            startActivity(i);
+
             return true;
         }
 
@@ -356,6 +486,7 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView = (RecyclerView) findViewById(R.id.card_recycler_view);
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
+        appPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
     }
     private void createListener(){
@@ -426,5 +557,13 @@ public class MainActivity extends AppCompatActivity
             Intent i = new Intent(MainActivity.this,RegistActivity.class);
             startActivity(i);
         }
+    }
+    public JSONArray parseJSONString(String string) throws JSONException {
+        return new JSONArray(string);
+    }
+    public String requestJSONString() throws ExecutionException, InterruptedException {
+        ConnManager conn = new ConnManager();
+        conn.execute("GET", ConnManager.main_url + ConnManager.dev_url);
+        return conn.get();
     }
 }

@@ -101,6 +101,8 @@ public class ScrollingActivity extends AppCompatActivity {
         IntentFilter intentfilter = new IntentFilter();
         intentfilter.addAction("kr.ac.bist.iot_noti.fcmNotification");
         intentfilter.addAction("kr.ac.bist.iot_noti.settingChange");
+
+
         refreshData();
 
 
@@ -150,43 +152,46 @@ public class ScrollingActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(ScrollingActivity.this);
-                builder.setCancelable(false).setTitle("신고").setMessage("보호자께서 입력하신 아래 주소로 앰뷸런스를 호출합니다.\n<"+appPreferences.getString("key_userAddress","")+">\n\n"+ getResources().getString(R.string.alarm)).setPositiveButton("신고", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //문자 메세지 발송 부
-                        SmsManager mSmsManager = SmsManager.getDefault();
-                        ArrayList<PendingIntent> sentIntent = new ArrayList<PendingIntent>();
-                        sentIntent.add(0,PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent("SMS_SENT_ACTION"), 0));
-                        ArrayList<PendingIntent> deliveredIntent = new ArrayList<PendingIntent>();
-                        deliveredIntent.add(0,PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent("SMS_DELIVERED_ACTION"), 0));
-                        Log.d("TAG", myDataset.size()+"////"+myDataset.get(0).textContent);
-                        ArrayList<String> arrayList= new ArrayList<String>();
-                        if(myDataset.size()!=0) {
-                            String alarmData = myDataset.get(0).textContent;
-                            //응급상황이 발생하였습니다. 신고자 : 홍길동 요구조자 :홍길동 주소 : 대구광역시 북구 대학로80 경북대학교
-                            arrayList = mSmsManager.divideMessage(myDataset.get(0).textContent+" 발생하였습니다."
-                                    + "\n신고자:" + appPreferences.getString("key_userName", "") + "\n요구조자:" + appPreferences.getString("key_userName2", "")+"\n"
-                                    +"주소:" +appPreferences.getString("key_userAddress",""));
-                            mSmsManager.sendMultipartTextMessage("01089159171",null,arrayList,sentIntent,deliveredIntent);
-
-                        }else{
-                            //응급상황이 발생하였습니다. 신고자 : 홍길동 요구조자 :홍길동
-                            arrayList = mSmsManager.divideMessage("응급상황이 발생하였습니다."
-                                    + "\n신고자:" + appPreferences.getString("key_userName", "") + "\n요구조자:" + appPreferences.getString("key_userName2", "")
-                                    +"주소:" +appPreferences.getString("key_userAddress",""));
-                            mSmsManager.sendMultipartTextMessage("01089159171",null,arrayList,sentIntent,deliveredIntent);
-                        }
-                    }
-                }).setNegativeButton("취소", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                }).show();
+                showDialog();
 
             }
         });
+    }
+    public void showDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(ScrollingActivity.this);
+        builder.setCancelable(false).setTitle("신고").setMessage("보호자께서 입력하신 아래 주소로 앰뷸런스를 호출합니다.\n<"+appPreferences.getString("key_userAddress","")+">\n\n"+ getResources().getString(R.string.alarm)).setPositiveButton("신고", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //문자 메세지 발송 부
+                SmsManager mSmsManager = SmsManager.getDefault();
+                ArrayList<PendingIntent> sentIntent = new ArrayList<PendingIntent>();
+                sentIntent.add(0,PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent("SMS_SENT_ACTION"), 0));
+                ArrayList<PendingIntent> deliveredIntent = new ArrayList<PendingIntent>();
+                deliveredIntent.add(0,PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent("SMS_DELIVERED_ACTION"), 0));
+                Log.d("TAG", myDataset.size()+"////"+myDataset.get(0).textContent);
+                ArrayList<String> arrayList= new ArrayList<String>();
+                if(myDataset.size()!=0) {
+                    String alarmData = myDataset.get(0).textContent;
+                    //응급상황이 발생하였습니다. 신고자 : 홍길동 요구조자 :홍길동 주소 : 대구광역시 북구 대학로80 경북대학교
+                    arrayList = mSmsManager.divideMessage(myDataset.get(0).textContent+" 발생하였습니다."
+                            + "\n신고자:" + appPreferences.getString("key_userName", "") + "\n요구조자:" + appPreferences.getString("key_userName2", "")+"\n"
+                            +"주소:" +appPreferences.getString("key_userAddress",""));
+                    mSmsManager.sendMultipartTextMessage("01089159171",null,arrayList,sentIntent,deliveredIntent);
+
+                }else{
+                    //응급상황이 발생하였습니다. 신고자 : 홍길동 요구조자 :홍길동
+                    arrayList = mSmsManager.divideMessage("응급상황이 발생하였습니다."
+                            + "\n신고자:" + appPreferences.getString("key_userName", "") + "\n요구조자:" + appPreferences.getString("key_userName2", "")
+                            +"주소:" +appPreferences.getString("key_userAddress",""));
+                    mSmsManager.sendMultipartTextMessage("01089159171",null,arrayList,sentIntent,deliveredIntent);
+                }
+            }
+        }).setNegativeButton("취소", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        }).show();
     }
     public boolean onCreateOptionsMenu(android.view.Menu menu) {
         //ToolBar Menu Icon 생성
@@ -243,7 +248,6 @@ public class ScrollingActivity extends AppCompatActivity {
                             builder.setCancelable(false).setTitle("에러").setMessage("서버 응답 없음\n서버의 인터넷 연결 유무를 확인하세요").setPositiveButton("종료", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    finish();
                                     dialog.dismiss();
                                 }
                             }).show();

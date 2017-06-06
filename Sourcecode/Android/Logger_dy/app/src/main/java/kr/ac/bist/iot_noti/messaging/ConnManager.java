@@ -17,12 +17,16 @@ import java.net.URL;
  */
 
 public class ConnManager extends AsyncTask<String, Void, String> {
-    public static final String main_url = "http://155.230.25.138:9191/";
+    public static String main_url = "http://155.230.25.140:9191/";
     public static final String log_url = "logs/";
     public static final String user_url = "notis/";
 
     private HttpURLConnection conn;
     private String result;
+
+    public void setMain_url(String main_url){
+        this.main_url = main_url;
+    }
 
     @Override
     protected String doInBackground(String... params) {
@@ -67,38 +71,82 @@ public class ConnManager extends AsyncTask<String, Void, String> {
         }
         return buf;
     }
-    private String doPost(HttpURLConnection conn, String param) throws Exception {
+    private String doPost(HttpURLConnection conn, String param) {
         conn.setDoInput(true);
         conn.setDoOutput(true);
-        conn.setRequestMethod("POST");
+        try {
+            conn.setRequestMethod("POST");
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+            return "ProtocolException";
+        }
 
         StringBuffer buffer = new StringBuffer();
         buffer.append(param);
 
-        OutputStreamWriter outStream = new OutputStreamWriter(conn.getOutputStream(),"EUC-KR");
+        OutputStreamWriter outStream = null;
+        try {
+            outStream = new OutputStreamWriter(conn.getOutputStream(),"EUC-KR");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "IOException";
+        }
         PrintWriter writer = new PrintWriter(outStream);
         writer.write(buffer.toString());
         writer.flush();
 
-        InputStreamReader inputStream = new InputStreamReader(conn.getInputStream(),"EUC-KR");
+        InputStreamReader inputStream = null;
+        try {
+            inputStream = new InputStreamReader(conn.getInputStream(),"EUC-KR");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "IOException";
+        }
         BufferedReader reader = new BufferedReader(inputStream);
         StringBuilder builder = new StringBuilder();
         String str;
-        while((str=reader.readLine())!=null){
-            builder.append(str+"\n");
+        try {
+            while((str=reader.readLine())!=null){
+                builder.append(str+"\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "IOException";
         }
         return builder.toString();
     }
-    private String doGet(HttpURLConnection conn) throws Exception {
-        conn.setRequestMethod("GET");
-        int resCode = conn.getResponseCode();
+    private String doGet(HttpURLConnection conn) {
+        try {
+            conn.setRequestMethod("GET");
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+            return "ProtocolException";
+        }
+        int resCode = 0;
+        try {
+            resCode = conn.getResponseCode();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "IOException";
+        }
         if(resCode!=HttpURLConnection.HTTP_OK) return null;
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "IOException";
+        }
         String input;
         StringBuffer sb = new StringBuffer();
-        while((input = reader.readLine())!=null){
-            sb.append(input);
+        try {
+            while((input = reader.readLine())!=null){
+                sb.append(input);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "IOException";
         }
         return sb.toString();
     }

@@ -2,6 +2,7 @@
     <string name="app_name">KNU 스마트 홈</string>
     <string name="str_done">완료</string>
     <string name="title_activity_scrolling">ScrollingActivity</string>
+    <string name="defualt_url">"http://155.230.25.130:9191/"</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"
 
