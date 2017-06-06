@@ -51,10 +51,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             if (msg.what == 0) {
                 try {
                     builder.show();
+                ScrollingActivity.mAdapter.notifyDataSetChanged();
                 }catch (Exception e){
                     e.printStackTrace();
                 }
-                ScrollingActivity.mAdapter.notifyDataSetChanged();
 
             }
         }
