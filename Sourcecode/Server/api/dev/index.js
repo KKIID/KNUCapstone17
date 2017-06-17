@@ -24,5 +24,5 @@ router.delete('/:id', controller.destroy);
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({extended:true}));
 router.post('/', controller.create);
-
+router.put('/', controller.edit);
 module.exports = router;

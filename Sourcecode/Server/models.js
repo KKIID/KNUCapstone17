@@ -1,11 +1,12 @@
 const Sequelize = require('sequelize');
-const sequelize = new Sequelize('SilverIoT','root','rudqnreogkrryBIST!',{
+const sequelize = new Sequelize('SilverIoT','root','root',{
         timezone: '+09:00'
     }
 );
 
 const Dev = sequelize.define('dev', {
-    name: Sequelize.STRING
+    name: Sequelize.STRING,
+    status : Sequelize.BOOLEAN
 });
 
 const User = sequelize.define('user', {
