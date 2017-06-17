@@ -54,7 +54,7 @@ public class DeviceEngine {
     }
     public static void controlDevices(int selected) {
         ConnManager conn = new ConnManager();
-        String[] params = {"id", selected+"" ,"status" ,(!getDevices().get(selected-1).getStatus())+""};
+        String[] params = {"id", selected+"" ,"status" ,(!getDevices().get(selected-1).getStatus())+"","code",Device.getCode(getDevices().get(selected-1).getName())};
         conn.execute("PUT",ConnManager.main_url+ConnManager.dev_url,ConnManager.makeParams(params));
     }
 }
@@ -65,15 +65,36 @@ class Device {
 
     public Device(String name, String status) {
         this.name = name;
-        if(Boolean.parseBoolean(status))
+        if (Boolean.parseBoolean(status))
             this.status = true;
         else
             this.status = false;
     }
+
     public String getName() {
         return name;
     }
+
     public boolean getStatus() {
         return status;
+    }
+
+    public static String getCode(String name) {
+        switch (name) {
+            case "전등":
+                return "0";
+            case "텔레비전":
+                return "1";
+            case "에어컨":
+                return "a";
+            case "선풍기":
+                return "8";
+            case "오디오":
+                return "5";
+            case "빔프로젝터":
+                return "1";
+            default:
+                return "0";
+        }
     }
 }

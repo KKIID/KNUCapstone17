@@ -17,6 +17,7 @@ public class ARSEngine {
         switch(step) {
             case 0:
                 engine = new SpeakerEngine();
+                DeviceEngine.refreshDevices();
                 engine.execute("비밀번호를 입력해주세요");
                 break;
             case 1:
@@ -41,7 +42,7 @@ public class ARSEngine {
         String name = DeviceEngine.getDevices().get(selected-1).getName();
         String status = (DeviceEngine.getDevices().get(selected-1).getStatus())?"켜진":"꺼진";
         String newStatus = (DeviceEngine.getDevices().get(selected-1).getStatus())?"끄":"켜";
-        return String.format("%d번, %s는 현재 %s 상태입니다. 전원을 %s려면 비밀번호와 샵버튼을 입력하세요",selected,name,status,newStatus);
+        return String.format("%d번, %s는 현재 %s 상태입니다. 전원을 %s려면 샵버튼을 입력하세요",selected,name,status,newStatus);
     }
     public void doStep(String string) {
         switch (step) {
@@ -98,12 +99,8 @@ public class ARSEngine {
         }
     }
     private boolean doControl(String string) {
-        if(passwordVerify(string)) {
-            DeviceEngine.controlDevices(selected);
-            return true;
-        } else {
-            return false;
-        }
+        DeviceEngine.controlDevices(selected);
+        return true;
     }
     private String getDevices() {
         DeviceEngine.refreshDevices();

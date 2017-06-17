@@ -1,17 +1,23 @@
 package kr.ac.bist.ars_iot.Activity;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.preference.PreferenceActivity;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,7 +53,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
         preSetting();
-
+        SharedPreferences pref = getSharedPreferences("ars", Context.MODE_APPEND);
+        ConnManager.main_url = pref.getString("key_ip","http://155.230.25.131:9191/");
     }
     @Override
     public void onClick(View v) {
@@ -202,6 +209,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public boolean onLongClick(View v) {
                 dial_text.setText("");
                 dial_length = 0;
+                return false;
+            }
+        });
+        dial_s.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                AlertDialog.Builder ad = new AlertDialog.Builder(MainActivity.this);
+
+                ad.setTitle("서버 IP주소 설정");
+                final EditText et = new EditText(MainActivity.this);
+                et.setText(ConnManager.main_url);
+                ad.setView(et);
+                ad.setPositiveButton("설정", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String value = et.getText().toString();
+                        SharedPreferences.Editor editor = getSharedPreferences("ars", Context.MODE_APPEND).edit();
+                        editor.putString("key_ip",value);
+                        editor.commit();
+                        ConnManager.main_url = value;
+                        dialog.dismiss();
+                    }
+                });
+                ad.show();
                 return false;
             }
         });
