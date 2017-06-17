@@ -92,10 +92,10 @@ public class RegistActivity extends AppCompatActivity {
         moduleItems.add(new moduleItem(R.drawable.bulb,"전등"));
         moduleItems.add(new moduleItem(R.drawable.telev,"텔레비전"));
         moduleItems.add(new moduleItem(R.drawable.airconditioner,"에어컨"));
-        moduleItems.add(new moduleItem(R.drawable.alert,"선풍기"));
-        moduleItems.add(new moduleItem(R.drawable.alert,"빔프로젝터"));
-        moduleItems.add(new moduleItem(R.drawable.alert,"카메라"));
-        moduleItems.add(new moduleItem(R.drawable.alert,"오디오"));
+        moduleItems.add(new moduleItem(R.drawable.fan,"선풍기"));
+        moduleItems.add(new moduleItem(R.drawable.beam,"빔프로젝터"));
+        moduleItems.add(new moduleItem(R.drawable.camera,"카메라"));
+        moduleItems.add(new moduleItem(R.drawable.audio,"오디오"));
 
 
         adapter = new moduleAdapter(this,R.layout.module_items,moduleItems);

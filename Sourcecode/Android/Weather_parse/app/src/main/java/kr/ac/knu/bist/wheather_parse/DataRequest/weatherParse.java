@@ -4,6 +4,7 @@ import android.util.Log;
 import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.Calendar;
  * Created by BIST120 on 2017-05-21.
  */
 
-public class weatherParse {
+public class weatherParse implements Serializable{
     private String lat;
     private String lon;
     private String URL = "http://apis.skplanetx.com/weather/current/hourly?version={version}&lat={lat}&lon={lon}";
@@ -35,6 +36,8 @@ public class weatherParse {
         if(lon==null || lon.equals("")){
             lon = "126.97806";
         }
+
+        Log.d("TAG","weather parse 위도 경도"+lat+"/"+lon);
         this.lat = lat;
         this.lon = lon;
 
@@ -55,7 +58,7 @@ public class weatherParse {
         conn = (HttpURLConnection) url3.openConnection();
         //conn.setUseCaches(false);
         conn.setRequestMethod("GET");
-        conn.setRequestProperty("appKey", "68f4b112-084d-3520-8ca6-95139ff14683");
+        conn.setRequestProperty("appKey", "d7c14ec1-588a-3f94-bc79-77c8c2600a7b");
 
         int resCode = 0;
         resCode = conn.getResponseCode();
@@ -90,7 +93,7 @@ public class weatherParse {
         conn = (HttpURLConnection) url2.openConnection();
         //conn.setUseCaches(false);
         conn.setRequestMethod("GET");
-        conn.setRequestProperty("appKey", "68f4b112-084d-3520-8ca6-95139ff14683");
+        conn.setRequestProperty("appKey", "d7c14ec1-588a-3f94-bc79-77c8c2600a7b");
 
         int resCode = 0;
         resCode = conn.getResponseCode();
@@ -115,12 +118,13 @@ public class weatherParse {
     }
 
     public ArrayList<String> getWeather() throws Exception {
+        Log.d("TAG","getWeather");
         weatherState = new ArrayList<>();
         url = new URL(URL);
         conn = (HttpURLConnection) url.openConnection();
         //conn.setUseCaches(false);
         conn.setRequestMethod("GET");
-        conn.setRequestProperty("appKey", "68f4b112-084d-3520-8ca6-95139ff14683");
+        conn.setRequestProperty("appKey", "d7c14ec1-588a-3f94-bc79-77c8c2600a7b");
 
         int resCode = 0;
         resCode = conn.getResponseCode();
@@ -164,11 +168,13 @@ public class weatherParse {
         weatherState.add(jsonObject.getJSONObject("temperature").getString("tmin"));/*오늘의 최저기온*/
         weatherState.add(jsonObject.getString("humidity"));/*상대 습도*/
         weatherState.add(jsonObject.getString("lightning"));/*낙뢰 유무*/
-        weatherState.add(jsonObject.getString("timeRelease"));/*발표 시간*/
+        weatherState.add(jsonObject.getString("timeRelease"));/*10 : 발표 시간*/
         weatherState.add(jsonObject.getJSONObject("grid").getString("city"));/*11*/
         weatherState.add(jsonObject.getJSONObject("grid").getString("county"));/*12*/
         weatherState.add(jsonObject.getJSONObject("grid").getString("village"));/*13*/
         weatherState.add(jsonObject.getJSONObject("sky").getString("code"));/*14*/
+        weatherState.add(jsonObject.getJSONObject("grid").getString("longitude"));/*15:long*/
+        weatherState.add(jsonObject.getJSONObject("grid").getString("latitude"));/*16:lat*/
         return weatherState;
     }
     class NotiDate {
@@ -218,5 +224,3 @@ public class weatherParse {
 
 
 }
-
-

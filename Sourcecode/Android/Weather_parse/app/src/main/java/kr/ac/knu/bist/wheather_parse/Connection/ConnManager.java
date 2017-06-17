@@ -49,6 +49,8 @@ public class ConnManager extends AsyncTask<String, Void, String> {
         }
 
         conn.setUseCaches(false);
+        conn.setConnectTimeout(1000);
+
         switch(params[0]) {
             case "POST" :
                 try {

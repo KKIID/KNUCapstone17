@@ -13,7 +13,7 @@ tools:context="kr.ac.knu.bist.wheather_parse.Activity.MainActivity">
 <android.support.design.widget.AppBarLayout
     android:id="@+id/app_bar"
     android:layout_width="match_parent"
-    android:layout_height="300dp"
+    android:layout_height="400dp"
     android:fitsSystemWindows="true"
     android:theme="@style/AppTheme.AppBarOverlay">
 
@@ -27,7 +27,7 @@ tools:context="kr.ac.knu.bist.wheather_parse.Activity.MainActivity">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="280dp"
+            android:layout_height="380dp"
             android:background="@drawable/sky"
             android:orientation="vertical">
 
@@ -37,7 +37,7 @@ tools:context="kr.ac.knu.bist.wheather_parse.Activity.MainActivity">
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginLeft="15dp"
-                android:layout_marginTop="85dp"
+                android:layout_marginTop="115dp"
                 android:columnCount="4"
                 android:orientation="horizontal"
                 android:rowCount="2">

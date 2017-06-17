@@ -1,6 +1,8 @@
 package kr.ac.knu.bist.wheather_parse.Activity;
 
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -76,6 +78,9 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
     private SharedPreferences.Editor editor;
     private searchBuffer myLocationPoint;
     private LocationManager locationManager;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -145,9 +150,13 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
             @Override
             public void onClick(View view) {
                 Log.d("TAG","searchMyLocation");
-                mapController.setMapCenter(currnetGeopoint);
-                mapController.setZoomLevel(11);
-                item.setPoint(currnetGeopoint);
+                try {
+                    mapController.setMapCenter(currnetGeopoint);
+                    mapController.setZoomLevel(11);
+                    item.setPoint(currnetGeopoint);
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -160,6 +169,9 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
                 mapController.setZoomLevel(11);
             }
         });
+
+
+
     }
 
     private void checkOnGPS() {
@@ -322,6 +334,7 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
 
     }
 
+
     @Override
     public void onMapInitHandler(NMapView nMapView, NMapError nMapError) {
         /*지도가 초기화 된 후 호출*/
@@ -423,4 +436,6 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
         myGeoPoint=point;
 
     }
+
+
 }

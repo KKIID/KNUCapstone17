@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="kr.ac.knu.bist.wheather_parse">
-
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- 위치정보활용시 추가 -->
@@ -12,6 +12,8 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <!-- WIFI 상태활용시 추가 -->
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -33,7 +35,15 @@
         <activity android:name=".Activity.MapActivity" />
         <activity android:name=".Activity.ModeActivity" />
         <activity android:name=".Activity.RegistActivity" />
-        <activity android:name=".Activity.SettingActivity"></activity>
+        <activity android:name=".Activity.SettingActivity" />
+        <receiver android:name=".AlarmManage.AlarmRecieve"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

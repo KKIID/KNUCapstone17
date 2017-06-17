@@ -1,5 +1,6 @@
 package kr.ac.knu.bist.wheather_parse.Activity;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -10,6 +11,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.NavigationView;
@@ -20,9 +22,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import kr.ac.knu.bist.wheather_parse.AlarmManage.AlarmManage;
 import kr.ac.knu.bist.wheather_parse.CardView.CardViewAdapter;
 import kr.ac.knu.bist.wheather_parse.CardView.CardViewData;
 import kr.ac.knu.bist.wheather_parse.Connection.ConnManager;
+import kr.ac.knu.bist.wheather_parse.DataRequest.weatherIO;
+import kr.ac.knu.bist.wheather_parse.DataRequest.weatherItems;
 import kr.ac.knu.bist.wheather_parse.DataRequest.weatherParse;
 import kr.ac.knu.bist.wheather_parse.ProgressBarAnimation;
 import kr.ac.knu.bist.wheather_parse.R;
@@ -51,7 +56,7 @@ import java.util.concurrent.ExecutionException;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, Button.OnClickListener {
 
-    private weatherParse myWeatherPerse = null;
+    private weatherParse myWeatherParse = null;
     private ArrayList<String> weatherState, airCondition, sunSetRise;
     private String longitude, latitude;
     private CircleProgress tempProgress, humProgress,airProgress;
@@ -72,6 +77,10 @@ public class MainActivity extends AppCompatActivity
     private SharedPreferences appPreferences;
     private String moduleName;
     private BroadcastReceiver broadcastReceiver;
+    private weatherIO myweatherIO;
+    private AlarmManage alarmManage=null;
+    private weatherItems w;
+    private long mLastClickTime;
 
     @SuppressLint("NewApi")
     @Override
@@ -79,10 +88,13 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         xmlIdConnection();
+        alarmManage = new AlarmManage();
+        alarmManage.registAlarm(getApplicationContext());
         //저장된 IP 호출
         connManager = new ConnManager();
         connManager.setMain_url(appPreferences.getString("key_serverIP",""));
 
+        myweatherIO = new weatherIO(getApplicationContext());
 
         /*사실 뭔지 잘모르겠음 ^^ ; 카드뷰 UI 부분임*/
         InitializingUI();
@@ -94,7 +106,7 @@ public class MainActivity extends AppCompatActivity
         /*기존에 저장되어 있던 위치 불러옴*/
         getSavedLocation();
         /*저장된 위치를 바탕으로 날씨 정보를 UI에 깔아줌*/
-        createViewContents();
+       createViewContents();
         /*Test Code*/
 
         /*기기 목록을 가져오기 위해 필요한 부분*/
@@ -184,12 +196,17 @@ public class MainActivity extends AppCompatActivity
                             code = '0';
                     }
                     final char finalCode = code;
-                    myDataset.add(i,new CardViewData(moduleName, icons[selected],num, code, new View.OnClickListener() {
+                    myDataset.add(i,new CardViewData(moduleName, icons[selected],num, code, new View.OnClickListener() {/*중복 클릭을 방지하는 코드*/
                         @Override
                         public void onClick(View v) {
-                            String[] params = {"id", (temp + 1) + "", "status", "1","code", finalCode+""};
+                            if (SystemClock.elapsedRealtime() - mLastClickTime < 2000){
+                                return;
+                            }
+                            mLastClickTime = SystemClock.elapsedRealtime();
+                            String[] params = {"id", (temp + 1) + "", "status", "1", "code", finalCode + ""};
                             moduleOperate(moduleName, params);
                         }
+
                     }, new View.OnLongClickListener() {
                         @Override
                         public boolean onLongClick(View v) {
@@ -247,13 +264,24 @@ public class MainActivity extends AppCompatActivity
         new TedPermission(this).setPermissionListener(new PermissionListener() {
             @Override
             public void onPermissionGranted() {
-                Toast.makeText(MainActivity.this, "권한 허가", Toast.LENGTH_SHORT).show();
             }
             @Override
             public void onPermissionDenied(ArrayList<String> deniedPermissions) {
             }
         }).setRationaleMessage("지도를 이용하기 위해서 권한이 필요합니다.").setPermissions(android.Manifest.permission.ACCESS_FINE_LOCATION).
                 check();
+
+        new TedPermission(this).setPermissionListener(new PermissionListener() {
+            @Override
+            public void onPermissionGranted() {
+            }
+            @Override
+            public void onPermissionDenied(ArrayList<String> deniedPermissions) {
+            }
+        }).setRationaleMessage("날씨 정보를 휴대폰 내부에 저장합니다.").setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE).
+                check();
+
+
     }
     @Override
     public void onBackPressed() {
@@ -315,7 +343,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
     private void createViewContents(){
-        myWeatherPerse = new weatherParse(latitude, longitude);
+        myWeatherParse = new weatherParse(latitude, longitude);
         /*sk 웨더플래닛에 있는 날씨 정보 파싱함.*/
         weatherParseStart();
         /*파싱한 데이터를 불러옴*/
@@ -416,10 +444,18 @@ public class MainActivity extends AppCompatActivity
 
     }
     private void getWeatherValues(){
-        humidity = (int)Double.parseDouble((weatherState.get(8).toString()));
-        temp = (int) Double.parseDouble(weatherState.get(5).toString());
-        airConditionValue = (int)Double.parseDouble(airCondition.get(0).toString());
-        airConditonString = airCondition.get(1);
+        try {
+            humidity = (int) Double.parseDouble((weatherState.get(8).toString()));
+            temp = (int) Double.parseDouble(weatherState.get(5).toString());
+            airConditionValue = (int) Double.parseDouble(airCondition.get(0).toString());
+            airConditonString = airCondition.get(1);
+        }catch (NullPointerException e){
+            e.printStackTrace();/*알람매니저가 돌아가지 않아서 데이터가 없을 수 있음*/
+            airConditionValue=0;
+            airConditonString=" ";
+            humidity=0;
+            temp = 0;
+        }
 
     }
     private void airProgressUI(){
@@ -497,44 +533,47 @@ public class MainActivity extends AppCompatActivity
         button3.setOnClickListener(this);
         navigationView.setNavigationItemSelectedListener(this);
     }
-    private void weatherParseStart() {
-        Thread t = new Thread(new Runnable() {/*Thread 빠지면 안됨.*/
-            @Override
-            public void run() {
-                try {
-                       /*weatherState index 설명*/
-                    /*0:풍향(degree) 1:풍속(m/s) 2:강수형태코드 3:1시간 누적 강수량(or적설량) 4:하늘상태코드명 5:1시간현재기온 6:오늘의 최고기온 7:오늘의 최저기온
-                    * 8:상대습도 9:낙뢰유무 10:발표시간
-                     * 자세한 것은 weatherParse 클래스 주석 참고*/
+    private void weatherParseStart()  {
+        /*weatherState index 설명*/
+        /*0:풍향(degree) 1:풍속(m/s) 2:강수형태코드 3:1시간 누적 강수량(or적설량) 4:하늘상태코드명 5:1시간현재기온 6:오늘의 최고기온 7:오늘의 최저기온
+         * 8:상대습도 9:낙뢰유무 10:발표시간
+         * 자세한 것은 weatherParse 클래스 주석 참고*/
+         /*sunSetRise index 설명*/
+         /*0:sunRise Time 1:sunSet Time*/
+         /*airCondition index 설명*/
+         /*농도(㎍/㎥) - 0~30: 좋음, 31~80: 보통, 81~120: 약간나쁨, 121~200: 나쁨, 201~300: 매우나쁨
+        /*등급 - 좋음, 보통, 약간나쁨, 나쁨, 매우나쁨*/
+         /*데이터는 알람매니저에서 주기적으로 불러와준다.*/
+        w = myweatherIO.weatherRead();/*저장되어 있는 데이터를 읽어온다.*/
+        if(w!=null) {
+            airCondition = w.getAirCondition();
+            weatherState = w.getWeatherState();
+            sunSetRise = w.getSunSetRise();
+        }else{/*저장되어 있는 데이터가 없다면 우선 불러온다.*/
+            try {
+                Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        getSavedLocation();
+                        myWeatherParse = new weatherParse(latitude,longitude);
+                        try {
+                            airCondition = myWeatherParse.getAirCondition();
+                            weatherState = myWeatherParse.getWeather();
+                            sunSetRise = myWeatherParse.getSunsetrise();
+                            w = new weatherItems(Integer.parseInt(myWeatherParse.getWeather().get(10).substring(11, 13)), longitude, latitude,
+                                    myWeatherParse.getAirCondition(), myWeatherParse.getWeather(), myWeatherParse.getSunsetrise());
+                            myweatherIO.weatherWrite(w);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                t.start();
+                t.join();
 
-                      /*sunSetRise index 설명*/
-                     /*0:sunRise Time 1:sunSet Time*/
-
-                     /*airCondition index 설명*/
-                    /*농도(㎍/㎥) - 0~30: 좋음, 31~80: 보통, 81~120: 약간나쁨, 121~200: 나쁨, 201~300: 매우나쁨
-                       /*등급 - 좋음, 보통, 약간나쁨, 나쁨, 매우나쁨*/
-                    airCondition = myWeatherPerse.getAirCondition();
-                    weatherState = myWeatherPerse.getWeather();
-                    sunSetRise = myWeatherPerse.getSunsetrise();
-                    int size = weatherState.size();
-                    int size2 = airCondition.size();
-                    int size3 = sunSetRise.size();
-                    for (int i = 0; i < size3; i++)
-                        Log.d("TAG", sunSetRise.get(i).toString());
-                    for (int i = 0; i < size2; i++)
-                        Log.d("TAG", airCondition.get(i).toString());
-                    for (int i = 0; i < size; i++)
-                        Log.d("TAG", weatherState.get(i).toString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            }catch (Exception e){
+                e.printStackTrace();
             }
-        });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 
