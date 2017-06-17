@@ -45,11 +45,10 @@ public class IntroActivity extends AppCompatActivity{
 
                 String[] string = {"name", Build.ID, "key", token};
                 try {
-                    if(conn.execute("POST", ConnManager.main_url + ConnManager.user_url, ConnManager.makeParams(string)).get().equals("IOException")||
-                            (conn.execute("POST", ConnManager.main_url + ConnManager.user_url, ConnManager.makeParams(string)).get().equals("ProtocolException"))){
+                    String result = conn.execute("POST", ConnManager.main_url + ConnManager.user_url, ConnManager.makeParams(string)).get();
+                    if(result.equals("IOException")||result.equals("ProtocolException")){
                         //인터넷 연결 문제 발생
                         Toast.makeText(getApplicationContext(),"서버와 연결되지 않습니다. 인터넷 연결 상태를 확인해주세요.",Toast.LENGTH_SHORT).show();
-
                      }
                 } catch (InterruptedException e) {
                     e.printStackTrace();

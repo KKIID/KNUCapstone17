@@ -59,6 +59,13 @@ public class ScrollingActivity extends AppCompatActivity {
     SharedPreferences appPreferences;
     private Toolbar toolbar;
     private CollapsingToolbarLayout appBarLayout;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(myReceiver);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,7 +73,7 @@ public class ScrollingActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         appBarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         appPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        toolbar.setTitle( appPreferences.getString("key_appname",""));
+        toolbar.setTitle( appPreferences.getString("key_appname","SmartHome 알리미"));
         setSupportActionBar(toolbar);
         mContext = this;
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
@@ -98,6 +105,7 @@ public class ScrollingActivity extends AppCompatActivity {
             ImageView view = (ImageView) findViewById(R.id.bar_img);
             view.setImageBitmap(BitmapFactory.decodeFile(image.getString("picturePath", "")));
         }
+        setUser();
         IntentFilter intentfilter = new IntentFilter();
         intentfilter.addAction("kr.ac.bist.iot_noti.fcmNotification");
         intentfilter.addAction("kr.ac.bist.iot_noti.settingChange");
@@ -113,9 +121,7 @@ public class ScrollingActivity extends AppCompatActivity {
                     refreshData();
                 }
                 if(intent.getAction().equals("kr.ac.bist.iot_noti.settingChange")){
-
                     appBarLayout.setTitle(appPreferences.getString("key_appname",""));
-
                 }
             }
         };
@@ -156,6 +162,32 @@ public class ScrollingActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public boolean setUser() {
+        String noti = "";
+        String[] keys = {"key_serverIP","key_userName","key_userName2","key_userNbr","key_userAddress"};
+        String[] vals = {"홈 서버 IP주소", "사용자 이름", "보호대상자 이름", "응급전화번호", "보호대상자 주소"};
+        boolean done = true;
+        for(int i = 0; i<keys.length; i++) {
+            if (!appPreferences.contains(keys[i])) {
+                noti += vals[i]+"\n";
+                done = false;
+            }
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(ScrollingActivity.this);
+        if(!done) {
+            builder.setCancelable(false).setTitle("설정이 완료되지 않았습니다.").setMessage(noti).setPositiveButton("설정창", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent intent = new Intent(ScrollingActivity.this, SettingsActivity.class);
+                    startActivity(intent);
+                    dialog.dismiss();
+                    finish();
+                }
+            }).show();
+        }
+        return done;
     }
     public void showDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(ScrollingActivity.this);
@@ -248,7 +280,10 @@ public class ScrollingActivity extends AppCompatActivity {
                             builder.setCancelable(false).setTitle("에러").setMessage("서버 응답 없음\n서버의 인터넷 연결 유무를 확인하세요").setPositiveButton("종료", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
+                                    Intent intent = new Intent(ScrollingActivity.this, SettingsActivity.class);
+                                    startActivity(intent);
                                     dialog.dismiss();
+                                    finish();
                                 }
                             }).show();
                         }

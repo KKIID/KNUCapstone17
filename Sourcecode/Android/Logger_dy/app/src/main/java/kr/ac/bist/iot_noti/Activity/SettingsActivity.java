@@ -23,8 +23,13 @@ public class SettingsActivity extends PreferenceActivity {
         appPreferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                Intent intent = new Intent("kr.ac.bist.iot_noti.settingChange");
-                sendBroadcast(intent);
+                if(key.equals("key_serverIP")) {
+                    Intent i = new Intent(SettingsActivity.this, IntroActivity.class);
+                    startActivity(i);
+                    finish();
+                } else {
+                    sendBroadcast(new Intent("kr.ac.bist.iot_noti.settingChange"));
+                }
             }
         });
     }

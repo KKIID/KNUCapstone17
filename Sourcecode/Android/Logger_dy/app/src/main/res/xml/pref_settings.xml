@@ -9,6 +9,7 @@
             android:title="홈 서버 IP주소 설정"
             android:inputType="text"
             android:hint="http://155.230.25.138:9191/"
+            android:defaultValue="@string/default_value"
             android:summary="홈 서버 IP 주소를 입력해주세요."
             />
         <EditTextPreference

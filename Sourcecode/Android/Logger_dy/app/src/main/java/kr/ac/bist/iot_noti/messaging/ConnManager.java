@@ -40,7 +40,7 @@ public class ConnManager extends AsyncTask<String, Void, String> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        conn.setConnectTimeout(3000);
         conn.setUseCaches(false);
         switch(params[0]) {
             case "POST" :
