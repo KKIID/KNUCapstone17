@@ -1,4 +1,4 @@
-package kr.ac.knu.bist.wheather_parse.DataRequest;
+package kr.ac.knu.bist.wheather_parse.Connection.Weather;
 
 import android.graphics.Bitmap;
 import android.util.Log;
@@ -20,7 +20,7 @@ import kr.ac.knu.bist.wheather_parse.R;
 public class weatherParse implements Serializable{
     private String lat;
     private String lon;
-    private final String appKey = "829e250e-cab9-350e-a03d-2f1ee3480b87";
+    private final String appKey = "1f23330d-e0bd-3102-8afc-b1bd656eb024";
     private final String URL0 = "http://apis.skplanetx.com/weather/current/hourly?version={version}&lat={lat}&lon={lon}";/*시간별날씨*/
     private final String URL1 = "http://apis.skplanetx.com/weather/dust?version={version}&lat={lat}&lon={lon}";/*미세먼지*/
     private final String URL2 =  "http://apis.skplanetx.com/gweather/current?version={version}&lat={lat}&lon={lon}";/*일출일몰*/
@@ -198,11 +198,11 @@ public class weatherParse implements Serializable{
             - SKY_O12: 뇌우, 비
             - SKY_O13: 뇌우, 눈
             - SKY_O14: 뇌우, 비 또는 눈*/
-        weatherState.add(jsonObject.getJSONObject("temperature").getString("tc"));/*1시간 현재기온*/
-        weatherState.add(jsonObject.getJSONObject("temperature").getString("tmax"));/*오늘의 최고기온*/
-        weatherState.add(jsonObject.getJSONObject("temperature").getString("tmin"));/*오늘의 최저기온*/
-        weatherState.add(jsonObject.getString("humidity"));/*상대 습도*/
-        weatherState.add(jsonObject.getString("lightning"));/*낙뢰 유무*/
+        weatherState.add(jsonObject.getJSONObject("temperature").getString("tc"));/*51시간 현재기온*/
+        weatherState.add(jsonObject.getJSONObject("temperature").getString("tmax"));/*6오늘의 최고기온*/
+        weatherState.add(jsonObject.getJSONObject("temperature").getString("tmin"));/*7오늘의 최저기온*/
+        weatherState.add(jsonObject.getString("humidity"));/*8상대 습도*/
+        weatherState.add(jsonObject.getString("lightning"));/*9낙뢰 유무*/
         weatherState.add(jsonObject.getString("timeRelease"));/*10 : 발표 시간*/
         weatherState.add(jsonObject.getJSONObject("grid").getString("city"));/*11*/
         weatherState.add(jsonObject.getJSONObject("grid").getString("county"));/*12*/

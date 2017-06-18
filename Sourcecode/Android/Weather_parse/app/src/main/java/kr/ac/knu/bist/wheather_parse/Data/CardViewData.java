@@ -1,4 +1,4 @@
-package kr.ac.knu.bist.wheather_parse.CardView;
+package kr.ac.knu.bist.wheather_parse.Data;
 
 import android.view.View;
 

@@ -1,4 +1,4 @@
-package kr.ac.knu.bist.wheather_parse.NaverMap;
+package kr.ac.knu.bist.wheather_parse.Connection.Location;
 
 /**
  * Created by BIST120 on 2017-05-21.

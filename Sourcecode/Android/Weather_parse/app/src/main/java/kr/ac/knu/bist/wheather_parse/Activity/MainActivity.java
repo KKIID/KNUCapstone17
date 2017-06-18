@@ -1,17 +1,12 @@
 package kr.ac.knu.bist.wheather_parse.Activity;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,24 +14,24 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import kr.ac.knu.bist.wheather_parse.AlarmManage.AlarmManage;
-import kr.ac.knu.bist.wheather_parse.CardView.CardViewAdapter;
-import kr.ac.knu.bist.wheather_parse.CardView.CardViewData;
+import kr.ac.knu.bist.wheather_parse.Connection.Device.DeviceEngine;
+import kr.ac.knu.bist.wheather_parse.Service.AlarmManager.AlarmManage;
+import kr.ac.knu.bist.wheather_parse.Layout.RegisteredModuleAdapter.CardViewAdapter;
+import kr.ac.knu.bist.wheather_parse.Data.CardViewData;
 import kr.ac.knu.bist.wheather_parse.Connection.ConnManager;
-import kr.ac.knu.bist.wheather_parse.CustomNotification.CustomNotification;
-import kr.ac.knu.bist.wheather_parse.DataRequest.weatherIO;
-import kr.ac.knu.bist.wheather_parse.DataRequest.weatherItems;
-import kr.ac.knu.bist.wheather_parse.DataRequest.weatherParse;
-import kr.ac.knu.bist.wheather_parse.ProgressBarAnimation;
+import kr.ac.knu.bist.wheather_parse.Connection.JSONParser;
+import kr.ac.knu.bist.wheather_parse.Service.CustomNotification.CustomNotification;
+import kr.ac.knu.bist.wheather_parse.Connection.Weather.weatherIO;
+import kr.ac.knu.bist.wheather_parse.Connection.Weather.weatherItems;
+import kr.ac.knu.bist.wheather_parse.Connection.Weather.weatherParse;
+import kr.ac.knu.bist.wheather_parse.Etc.ProgressBarAnimation;
 import kr.ac.knu.bist.wheather_parse.R;
 import android.content.Intent;
 import android.support.v7.widget.LinearLayoutManager;
@@ -45,8 +40,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,12 +52,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.concurrent.ExecutionException;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, Button.OnClickListener {
-
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, Button.OnClickListener {
     private weatherParse myWeatherParse = null;
     private ArrayList<String> weatherState, airCondition, sunSetRise;
     private String longitude, latitude;
@@ -91,9 +81,6 @@ public class MainActivity extends AppCompatActivity
     private weatherItems w;
     private long mLastClickTime;
 
-   private CustomNotification customNotification;
-
-    @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,7 +97,6 @@ public class MainActivity extends AppCompatActivity
 
         /*사실 뭔지 잘모르겠음 ^^ ; 카드뷰 UI 부분임*/
         InitializingUI();
-
         /*UI event listener 연결*/
         createListener();
         /*최초 실행 시 지도 사용 퍼미션 획득*/
@@ -120,10 +106,9 @@ public class MainActivity extends AppCompatActivity
         /*저장된 위치를 바탕으로 날씨 정보를 UI에 깔아줌*/
         createViewContents();
         /*Test Code*/
-
+        setWeather();
         /*받아 온 날씨 정보를 notification에 전달*/
-        customNotification.showCustomNotification("",0,0,0,weatherParse.weatherIconUI(weatherState,sunSetRise));
-
+        CustomNotification.showNotification(getApplicationContext(),"좋은 하루 되세요~~",temp,airConditionValue,humidity,weatherParse.weatherIconUI(weatherState,sunSetRise), airConditonString);
         /*기기 목록을 가져오기 위해 필요한 부분*/
         myDataset = new ArrayList<>();
         mAdapter = new CardViewAdapter(myDataset);
@@ -143,11 +128,56 @@ public class MainActivity extends AppCompatActivity
         registerReceiver(broadcastReceiver, intentfilter);
 
     }
+
+    private void setWeather() {
+        //AirCondition
+        if(airConditionValue > 0)
+            animateCircularProgress(airCondition(airConditionValue),0f,(float)airConditionValue);
+        else
+            airCondition(airConditionValue).setProgress(0);
+        //Temperature
+        CircleProgress temperture = createCircularProgress(R.id.tempProgress,50,Color.RED);
+        temperture.setSuffixText("°C");
+        temperture.setTextSize(30.0f);
+        animateCircularProgress(temperture,0f,(float)temp);
+        //Humidity
+        animateCircularProgress(createCircularProgress(R.id.humProgress,100,Color.BLUE),0f,(float)humidity);
+        //Icon Setting
+        weatherIcon.setImageDrawable(getResources().getDrawable(weatherParse.weatherIconUI(weatherState, sunSetRise)));
+    }
+    private CircleProgress airCondition(int value) {
+        outsideAirCondition.setText("대기질 "+airConditonString);
+        if(value<30)
+            return createCircularProgress(R.id.airCondition, 50, Color.BLUE);                   //매우좋음
+        else if(value<80)
+            return createCircularProgress(R.id.airCondition, 90, Color.GREEN);                 //좋음
+        else if(value<120)
+            return createCircularProgress(R.id.airCondition, 150, Color.YELLOW);               //보통
+        else if(value<200)
+            return createCircularProgress(R.id.airCondition, 250, Color.LTGRAY);                //나쁨
+        else
+            return createCircularProgress(R.id.airCondition, 300, Color.RED);                   //매우나쁨
+    }
+    public CircleProgress createCircularProgress(int resourceId, int max, int color) {
+        CircleProgress view = (CircleProgress)findViewById(resourceId);
+        view.setMax(max);
+        view.setFinishedColor(color);
+        view.setTextSize(50.0f);
+        view.setUnfinishedColor(Color.WHITE);
+        view.setTextColor(Color.BLACK);
+        view.setSuffixText("");
+        return view;
+    }
+    public void animateCircularProgress(CircleProgress view, float start, float end) {
+        ProgressBarAnimation anim = new ProgressBarAnimation(view, start, end);
+        anim.setDuration(1000);
+        view.startAnimation(anim);
+    }
     public void refreshModuleList() {
         myDataset.clear();
         JSONArray array=null;
         try {
-            array = parseJSONString(requestJSONString());
+            array = JSONParser.parseJSONString(JSONParser.requestJSONString());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -219,15 +249,20 @@ public class MainActivity extends AppCompatActivity
                                 return;
                             }
                             mLastClickTime = SystemClock.elapsedRealtime();
-                            String[] params = {"id", (temp + 1) + "", "status", "1", "code", finalCode + ""};
-                            moduleOperate(moduleName, params);
+                            Toast.makeText(getApplicationContext(), "동작중입니다.",Toast.LENGTH_SHORT).show();
+                            try {
+                                DeviceEngine.controlDevice(temp + 1, true, finalCode);
+                            } catch (Exception e) {
+                                Toast.makeText(getApplicationContext(), "동작에 실패하였습니다.",Toast.LENGTH_SHORT).show();
+                            } finally {
+                                Toast.makeText(getApplicationContext(), "정상처리 되었습니다.",Toast.LENGTH_SHORT).show();
+                            }
                         }
 
                     }, new View.OnLongClickListener() {
                         @Override
                         public boolean onLongClick(View v) {
-                            connManager = new ConnManager();
-                            connManager.execute("DELETE",ConnManager.main_url+ConnManager.dev_url+myDataset.get(temp).id);
+                            DeviceEngine.deleteDevice(myDataset.get(temp).id);
                             refreshModuleList();
                             Toast.makeText(getApplicationContext(),moduleName+" 삭제되었습니다.",Toast.LENGTH_SHORT).show();
                             return true;
@@ -247,37 +282,24 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(getApplicationContext(),moduleName+" 동작 중, 잠시 기다려 주세요.",Toast.LENGTH_SHORT).show();
         String result=null;
         connManager = new ConnManager();
-        try {
-            result = connManager.execute("PUT",ConnManager.main_url+ConnManager.dev_url,ConnManager.makeParams(params)).get();
-            if(result.equals("IOException")|| result.equals("ProtocolException")||result.equals("MalformedURLException")) {
-                Toast.makeText(getApplicationContext(), "동작 실패. IP설정을 확인해주세요.",Toast.LENGTH_SHORT).show();
-            }else{
-                Toast.makeText(getApplicationContext(),moduleName+" 동작 완료.",Toast.LENGTH_SHORT).show();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+
     }
     public void InitializingUI(){
         setSupportActionBar(toolbar);
-        toolbarLayout.setTitle("  ");
+        toolbarLayout.setTitle("SmartHome IoT");
         toolbar.setTitle(" ");
+        toolbarLayout.setExpandedTitleColor(0x00000000);
+        toolbarLayout.setCollapsedTitleTextColor(Color.WHITE);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        customNotification = new CustomNotification(this);
-
     }
     public void getSavedLocation(){
         SharedPreferences appPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         longitude = appPreferences.getString("LONGITUDE", "");
         latitude = appPreferences.getString("LATITUDE", "");
-
         Log.d("TAG","저장되어 있던 위도 경도"+latitude+"/"+longitude);
     }
-
     public void requestPermission(){
         new TedPermission(this).setPermissionListener(new PermissionListener() {
             @Override
@@ -298,68 +320,8 @@ public class MainActivity extends AppCompatActivity
             }
         }).setRationaleMessage("날씨 정보를 휴대폰 내부에 저장합니다.").setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE).
                 check();
-
-
-    }
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Intent i = new Intent(this, SettingActivity.class);
-            startActivity(i);
-
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
     private void createViewContents(){
         myWeatherParse = new weatherParse(latitude, longitude);
         /*sk 웨더플래닛에 있는 날씨 정보 파싱함.*/
@@ -367,100 +329,9 @@ public class MainActivity extends AppCompatActivity
         /*파싱한 데이터를 불러옴*/
         getWeatherValues();
         /*각 UI component를 파싱된 데이터로 세팅함*/
-        humProgressUI();
-        tempProgressUI();
-        airProgressUI();
-        weatherIconUI();
         weatherLocation.setText(weatherState.get(11)+" "+weatherState.get(12)+" "+weatherState.get(13));
         weatherTime.setText(weatherState.get(10).substring(5,7)+"월 "+weatherState.get(10).substring(8,10)+"일 "+weatherState.get(10).substring(11,13)+"시 기준");
         currentWeather.setText(weatherState.get(4));
-    }
-
-    private void weatherIconUI() {
-        Log.d("TAG",weatherState.get(14).toString());
-        Calendar cal = Calendar.getInstance();
-        int time = cal.get(Calendar.HOUR_OF_DAY);
-        Boolean afterSunSet;
-        /*sunSet이후를 파악하여 아이콘을 달리하기 위함.*/
-        if(time>Integer.parseInt(sunSetRise.get(0).toString().substring(0,2))&&time<Integer.parseInt(sunSetRise.get(1).toString().substring(0,2))){
-            afterSunSet=true;
-        }else{
-            afterSunSet=false;
-        }
-        if (weatherState.get(14).toString().equals("SKY_O00")) {/*하늘 상태 코드명, 참고 : https://developers.skplanetx.com/apidoc/kor/weather/*/
-            weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather38));
-
-        }
-        if(weatherState.get(14).toString().equals("SKY_O01")){
-            if(afterSunSet) {
-                weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather01));
-            }else{
-
-                weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather08));
-            }
-        }
-        if(weatherState.get(14).toString().equals("SKY_O02")){
-            if(afterSunSet) {
-                weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather02));
-            }else{
-
-                weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather09));
-            }
-        }
-
-        if(weatherState.get(14).toString().equals("SKY_O03")){
-            if(afterSunSet) {
-                weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather03));
-            }
-            else{
-                weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather10));
-            }
-        }
-        if(weatherState.get(14).toString().equals("SKY_O04")){
-            if(afterSunSet) {
-                weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather12));
-            }else {
-                weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather40));
-            }
-        }
-        if(weatherState.get(14).toString().equals("SKY_O05")){
-            if(afterSunSet) {
-                weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather13));
-            }else {
-                weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather41));
-            }
-        }
-        if(weatherState.get(14).toString().equals("SKY_O06")){
-            if(afterSunSet) {
-                weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather14));
-            }else {
-                weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather42));
-            }
-        }
-        if(weatherState.get(14).toString().equals("SKY_O07")){
-            weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather18));
-        }
-        if(weatherState.get(14).toString().equals("SKY_O08")){
-            weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather21));
-        }
-        if(weatherState.get(14).toString().equals("SKY_O09")){
-            weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather32));
-        }
-        if(weatherState.get(14).toString().equals("SKY_O10")){
-            weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather04));
-        }
-        if(weatherState.get(14).toString().equals("SKY_O11")){
-            weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather29));
-        }if(weatherState.get(14).toString().equals("SKY_O12")){
-            weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather26));
-        }if(weatherState.get(14).toString().equals("SKY_O13")){
-            weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather27));
-        }
-        if(weatherState.get(14).toString().equals("SKY_O14")){
-            weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather28));
-        }
-
-
     }
     private void getWeatherValues(){
         try {
@@ -475,52 +346,6 @@ public class MainActivity extends AppCompatActivity
             humidity=0;
             temp = 0;
         }
-
-    }
-    private void airProgressUI(){
-        Log.d("TAG",airConditionValue+"");
-        airProgress.setMax(350);
-        if(airConditionValue<30){/*좋음*/
-            airProgress.setMax(50);
-            airProgress.setFinishedColor(Color.BLUE);
-        }else if(airConditionValue<80){/*보통*/
-            airProgress.setMax(90);
-            airProgress.setFinishedColor(Color.GREEN);
-        }else if(airConditionValue<120){/*약간나쁨*/
-            airProgress.setMax(150);
-            airProgress.setFinishedColor(Color.YELLOW);
-        }else if(airConditionValue<200){/*나쁨*/
-            airProgress.setMax(250);
-            airProgress.setFinishedColor(Color.LTGRAY);
-        }else{/*매우 나쁨*/
-            airProgress.setMax(300);
-            airProgress.setUnfinishedColor(Color.RED);
-        }
-        ProgressBarAnimation anim = new ProgressBarAnimation(airProgress, (float)0, (float)airConditionValue);
-        anim.setDuration(1000);
-        airProgress.startAnimation(anim);
-        airProgress.setTextSize((float) 50.0);
-        airProgress.setUnfinishedColor(Color.WHITE);
-        airProgress.setTextColor(Color.BLACK);
-        airProgress.setSuffixText("");
-        outsideAirCondition.setText("대기질 "+airConditonString);
-    }
-    private void humProgressUI(){
-        ProgressBarAnimation anim = new ProgressBarAnimation(humProgress, (float)0, (float)humidity);
-        anim.setDuration(1000);
-        humProgress.startAnimation(anim);
-        humProgress.setTextColor(Color.BLACK);
-        humProgress.setUnfinishedColor(Color.WHITE);
-    }
-    private void tempProgressUI(){
-        ProgressBarAnimation anim = new ProgressBarAnimation(tempProgress, (float)0, (float)temp);
-        anim.setDuration(1000);
-        tempProgress.setSuffixText("°C");
-        tempProgress.setFinishedColor(Color.argb(255,255,051,051));
-        tempProgress.setUnfinishedColor(Color.WHITE);
-        tempProgress.setTextColor(Color.BLACK);
-        tempProgress.setMax(50);
-        tempProgress.startAnimation(anim);
     }
     private void xmlIdConnection(){
         toolbar = (Toolbar)findViewById(R.id.toolbar);
@@ -542,8 +367,6 @@ public class MainActivity extends AppCompatActivity
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         appPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-
     }
     private void createListener(){
         homeIconView.setOnClickListener(this);
@@ -602,6 +425,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+
     @Override
     public void onClick(View view) {
         if(view.getId()==R.id.homeIconView||view.getId()==R.id.weatherLocation){
@@ -611,8 +435,6 @@ public class MainActivity extends AppCompatActivity
         }
         if (view.getId()==R.id.button111){
 
-            new CustomNotification(this).showCustomNotification("히히",10,10,10,2130903040);
-            //unregisterReceiver(receiver);
         }
         if(view.getId()==R.id.button2){
             Intent i = new Intent(MainActivity.this,ModeActivity.class);
@@ -623,14 +445,59 @@ public class MainActivity extends AppCompatActivity
             startActivity(i);
         }
     }
-
-
-    public JSONArray parseJSONString(String string) throws JSONException {
-        return new JSONArray(string);
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
-    public String requestJSONString() throws ExecutionException, InterruptedException {
-        ConnManager conn = new ConnManager();
-        conn.execute("GET", ConnManager.main_url + ConnManager.dev_url);
-        return conn.get();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            Intent i = new Intent(this, SettingActivity.class);
+            startActivity(i);
+
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_camera) {
+            // Handle the camera action
+        } else if (id == R.id.nav_gallery) {
+
+        } else if (id == R.id.nav_slideshow) {
+
+        } else if (id == R.id.nav_manage) {
+
+        } else if (id == R.id.nav_share) {
+
+        } else if (id == R.id.nav_send) {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 }

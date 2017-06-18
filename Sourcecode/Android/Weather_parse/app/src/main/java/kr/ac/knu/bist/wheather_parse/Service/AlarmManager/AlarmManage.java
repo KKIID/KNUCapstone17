@@ -1,4 +1,4 @@
-package kr.ac.knu.bist.wheather_parse.AlarmManage;
+package kr.ac.knu.bist.wheather_parse.Service.AlarmManager;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;

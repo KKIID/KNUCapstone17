@@ -1,4 +1,4 @@
-package kr.ac.knu.bist.wheather_parse;
+package kr.ac.knu.bist.wheather_parse.Etc;
 
 import android.view.animation.Animation;
 import android.view.animation.Transformation;

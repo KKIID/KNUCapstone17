@@ -1,7 +1,6 @@
-package kr.ac.knu.bist.wheather_parse.DataRequest;
+package kr.ac.knu.bist.wheather_parse.Connection.Weather;
 
 import android.content.Context;
-import android.os.Environment;
 import android.util.Log;
 
 import java.io.File;

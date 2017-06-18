@@ -1,4 +1,4 @@
-package kr.ac.knu.bist.wheather_parse.CardView;
+package kr.ac.knu.bist.wheather_parse.Layout.RegisteredModuleAdapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import kr.ac.knu.bist.wheather_parse.Data.CardViewData;
 import kr.ac.knu.bist.wheather_parse.R;
 
 /**

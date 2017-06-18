@@ -1,4 +1,4 @@
-package kr.ac.knu.bist.wheather_parse.NaverMap;
+package kr.ac.knu.bist.wheather_parse.Connection.Location;
 
 /**
  * Created by BIST120 on 2017-05-21.
@@ -21,7 +21,7 @@ import com.nhn.android.maps.overlay.NMapPOIitem;
 import com.nhn.android.mapviewer.overlay.NMapCalloutCustomOverlay;
 import com.nhn.android.mapviewer.overlay.NMapResourceProvider;
 
-import kr.ac.knu.bist.wheather_parse.NaverMap.NMapPOIflagType;
+import kr.ac.knu.bist.wheather_parse.Connection.Location.NMapPOIflagType;
 import kr.ac.knu.bist.wheather_parse.R;
 
 /**

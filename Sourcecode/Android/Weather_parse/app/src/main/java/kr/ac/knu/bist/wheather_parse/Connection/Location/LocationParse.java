@@ -1,4 +1,4 @@
-package kr.ac.knu.bist.wheather_parse.DataRequest;
+package kr.ac.knu.bist.wheather_parse.Connection.Location;
 
 import android.util.Log;
 import org.json.JSONArray;
@@ -9,8 +9,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-
-import kr.ac.knu.bist.wheather_parse.NaverMap.searchBuffer;
 
 /**
  * Created by BIST120 on 2017-05-22.
@@ -71,7 +69,5 @@ public class LocationParse {
         Log.d("TAG","URL2"+URL);
         return searchResult;
     }
-
-
 }
 

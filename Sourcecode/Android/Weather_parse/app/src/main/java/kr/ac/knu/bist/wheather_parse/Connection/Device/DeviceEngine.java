@@ -1,10 +1,14 @@
-package kr.ac.knu.bist.wheather_parse.Connection;
+package kr.ac.knu.bist.wheather_parse.Connection.Device;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
+
+import kr.ac.knu.bist.wheather_parse.Connection.ConnManager;
 
 
 /**
@@ -13,7 +17,6 @@ import java.util.concurrent.ExecutionException;
 
 public class DeviceEngine {
     private static ArrayList<Device> devices = new ArrayList<>();
-
     public static ArrayList<Device> getDevices() {
         return devices;
     }
@@ -51,9 +54,24 @@ public class DeviceEngine {
     public static boolean isInList(int num) {
         return (num > 0) && (num <= devices.size());
     }
-    public static void controlDevices(int selected) {
+
+    public static void addDevice(String name) {
+        ConnManager connManager = new ConnManager();
+        String[] string = new String[0];
+        try {
+            string = new String[]{"name", URLEncoder.encode(name,"UTF-8")};
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        connManager.execute("POST", ConnManager.main_url + ConnManager.dev_url, ConnManager.makeParams(string));
+    }
+    public static void deleteDevice(int id) {
+        ConnManager connManager = new ConnManager();
+        connManager.execute("DELETE",ConnManager.main_url+ConnManager.dev_url+id);
+    }
+    public static void controlDevice(int id, boolean status, char code) {
         ConnManager conn = new ConnManager();
-        String[] params = {"id", selected+"" ,"status" ,(!getDevices().get(selected-1).getStatus())+""};
+        String[] params = {"id", id+"" ,"status" , !status+"", "code", code+""};
         conn.execute("PUT",ConnManager.main_url+ConnManager.dev_url,ConnManager.makeParams(params));
     }
 }

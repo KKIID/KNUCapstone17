@@ -1,8 +1,6 @@
-package kr.ac.knu.bist.wheather_parse.ModuleRegist;
+package kr.ac.knu.bist.wheather_parse.Layout.RegisterableModuleAdapter;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +10,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import kr.ac.knu.bist.wheather_parse.CardView.CardViewAdapter;
+import kr.ac.knu.bist.wheather_parse.Data.moduleItem;
 import kr.ac.knu.bist.wheather_parse.R;
 
 /**

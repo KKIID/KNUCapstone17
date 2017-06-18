@@ -1,4 +1,4 @@
-package kr.ac.knu.bist.wheather_parse.Interface;
+package kr.ac.knu.bist.wheather_parse.Etc;
 
 import com.nhn.android.maps.NMapActivity;
 import com.nhn.android.maps.NMapLocationManager;

@@ -1,4 +1,4 @@
-package kr.ac.knu.bist.wheather_parse.DataRequest;
+package kr.ac.knu.bist.wheather_parse.Connection.Weather;
 
 
 import java.io.Serializable;

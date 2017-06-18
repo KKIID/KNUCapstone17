@@ -36,7 +36,7 @@
         <activity android:name=".Activity.ModeActivity" />
         <activity android:name=".Activity.RegistActivity" />
         <activity android:name=".Activity.SettingActivity" />
-        <receiver android:name=".AlarmManage.AlarmRecieve"
+        <receiver android:name=".Service.AlarmManager.AlarmRecieve"
             android:enabled="true"
             android:exported="false">
             <intent-filter>

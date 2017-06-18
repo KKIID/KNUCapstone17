@@ -1,14 +1,11 @@
 package kr.ac.knu.bist.wheather_parse.Activity;
 
 import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
-import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -43,11 +40,11 @@ import com.nhn.android.mapviewer.overlay.NMapPOIdataOverlay;
 
 import java.util.ArrayList;
 
-import kr.ac.knu.bist.wheather_parse.Interface.InterfaceBinding;
-import kr.ac.knu.bist.wheather_parse.NaverMap.NMapPOIflagType;
-import kr.ac.knu.bist.wheather_parse.DataRequest.LocationParse;
-import kr.ac.knu.bist.wheather_parse.NaverMap.NMapViewerResourceProvider;
-import kr.ac.knu.bist.wheather_parse.NaverMap.searchBuffer;
+import kr.ac.knu.bist.wheather_parse.Connection.Location.LocationParse;
+import kr.ac.knu.bist.wheather_parse.Etc.InterfaceBinding;
+import kr.ac.knu.bist.wheather_parse.Connection.Location.NMapPOIflagType;
+import kr.ac.knu.bist.wheather_parse.Connection.Location.NMapViewerResourceProvider;
+import kr.ac.knu.bist.wheather_parse.Connection.Location.searchBuffer;
 import kr.ac.knu.bist.wheather_parse.R;
 
 
@@ -436,6 +433,4 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
         myGeoPoint=point;
 
     }
-
-
 }
