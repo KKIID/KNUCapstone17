@@ -3,11 +3,15 @@ package kr.ac.knu.bist.wheather_parse.Activity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,9 +19,11 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +32,7 @@ import kr.ac.knu.bist.wheather_parse.AlarmManage.AlarmManage;
 import kr.ac.knu.bist.wheather_parse.CardView.CardViewAdapter;
 import kr.ac.knu.bist.wheather_parse.CardView.CardViewData;
 import kr.ac.knu.bist.wheather_parse.Connection.ConnManager;
+import kr.ac.knu.bist.wheather_parse.CustomNotification.CustomNotification;
 import kr.ac.knu.bist.wheather_parse.DataRequest.weatherIO;
 import kr.ac.knu.bist.wheather_parse.DataRequest.weatherItems;
 import kr.ac.knu.bist.wheather_parse.DataRequest.weatherParse;
@@ -38,6 +45,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -82,12 +91,15 @@ public class MainActivity extends AppCompatActivity
     private weatherItems w;
     private long mLastClickTime;
 
+   private CustomNotification customNotification;
+
     @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         xmlIdConnection();
+
         alarmManage = new AlarmManage();
         alarmManage.registAlarm(getApplicationContext());
         //저장된 IP 호출
@@ -106,8 +118,11 @@ public class MainActivity extends AppCompatActivity
         /*기존에 저장되어 있던 위치 불러옴*/
         getSavedLocation();
         /*저장된 위치를 바탕으로 날씨 정보를 UI에 깔아줌*/
-       createViewContents();
+        createViewContents();
         /*Test Code*/
+
+        /*받아 온 날씨 정보를 notification에 전달*/
+        customNotification.showCustomNotification("",0,0,0,weatherParse.weatherIconUI(weatherState,sunSetRise));
 
         /*기기 목록을 가져오기 위해 필요한 부분*/
         myDataset = new ArrayList<>();
@@ -122,6 +137,7 @@ public class MainActivity extends AppCompatActivity
                 if(intent.getAction().equals("kr.ac.bist.iot_noti.moduleRegist")){
                     refreshModuleList();
                 }
+
             }
         };
         registerReceiver(broadcastReceiver, intentfilter);
@@ -251,6 +267,8 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
+        customNotification = new CustomNotification(this);
+
     }
     public void getSavedLocation(){
         SharedPreferences appPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -371,6 +389,7 @@ public class MainActivity extends AppCompatActivity
         }
         if (weatherState.get(14).toString().equals("SKY_O00")) {/*하늘 상태 코드명, 참고 : https://developers.skplanetx.com/apidoc/kor/weather/*/
             weatherIcon.setImageDrawable(getResources().getDrawable(R.drawable.weather38));
+
         }
         if(weatherState.get(14).toString().equals("SKY_O01")){
             if(afterSunSet) {
@@ -507,7 +526,7 @@ public class MainActivity extends AppCompatActivity
         toolbar = (Toolbar)findViewById(R.id.toolbar);
         toolbarLayout = (CollapsingToolbarLayout)findViewById(R.id.toolbar_layout);
         mRecyclerView = (RecyclerView) findViewById(R.id.card_recycler_view);
-        button1 = (Button)findViewById(R.id.button1);
+        button1 = (Button)findViewById(R.id.button111);
         button2 = (Button)findViewById(R.id.button2);
         button3 = (Button)findViewById(R.id.button3);
         homeIconView = (ImageView)findViewById(R.id.homeIconView);
@@ -523,6 +542,7 @@ public class MainActivity extends AppCompatActivity
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         appPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
 
     }
     private void createListener(){
@@ -560,8 +580,13 @@ public class MainActivity extends AppCompatActivity
                             airCondition = myWeatherParse.getAirCondition();
                             weatherState = myWeatherParse.getWeather();
                             sunSetRise = myWeatherParse.getSunsetrise();
+                            /*public weatherItems(int saveTime*//*데이터가 저장된 시간*//*,String longitude,String latitude, ArrayList<String> airCondition, ArrayList<String> weatherState,
+                                ArrayList<String> sunSetRise, ArrayList<String> alertWeather, ArrayList<String> Laundary, ArrayList<String> UltraViolet, ArrayList<String> FeelTemp,
+                                ArrayList<String> Discomfort, ArrayList<String> SkinProblem)*/
                             w = new weatherItems(Integer.parseInt(myWeatherParse.getWeather().get(10).substring(11, 13)), longitude, latitude,
-                                    myWeatherParse.getAirCondition(), myWeatherParse.getWeather(), myWeatherParse.getSunsetrise());
+                                    myWeatherParse.getAirCondition(), myWeatherParse.getWeather(), myWeatherParse.getSunsetrise(), myWeatherParse.getalertWeather(),
+                                    myWeatherParse.getLaundary(),myWeatherParse.getUltraViolet(),myWeatherParse.getFeelTemp(),myWeatherParse.getDiscomfort(),myWeatherParse.getSkinProblem());
+
                             myweatherIO.weatherWrite(w);
                         }catch (Exception e){
                             e.printStackTrace();
@@ -584,8 +609,9 @@ public class MainActivity extends AppCompatActivity
             startActivity(i);
             finish();
         }
-        if (view.getId()==R.id.button1){
+        if (view.getId()==R.id.button111){
 
+            new CustomNotification(this).showCustomNotification("히히",10,10,10,2130903040);
             //unregisterReceiver(receiver);
         }
         if(view.getId()==R.id.button2){
@@ -597,6 +623,8 @@ public class MainActivity extends AppCompatActivity
             startActivity(i);
         }
     }
+
+
     public JSONArray parseJSONString(String string) throws JSONException {
         return new JSONArray(string);
     }
