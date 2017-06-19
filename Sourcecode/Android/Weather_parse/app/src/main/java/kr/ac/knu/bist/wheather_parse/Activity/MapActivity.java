@@ -38,9 +38,11 @@ import com.nhn.android.mapviewer.overlay.NMapMyLocationOverlay;
 import com.nhn.android.mapviewer.overlay.NMapOverlayManager;
 import com.nhn.android.mapviewer.overlay.NMapPOIdataOverlay;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import kr.ac.knu.bist.wheather_parse.Connection.Location.LocationParse;
+import kr.ac.knu.bist.wheather_parse.Connection.Weather.weatherIO;
 import kr.ac.knu.bist.wheather_parse.Etc.InterfaceBinding;
 import kr.ac.knu.bist.wheather_parse.Connection.Location.NMapPOIflagType;
 import kr.ac.knu.bist.wheather_parse.Connection.Location.NMapViewerResourceProvider;
@@ -87,10 +89,10 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
         createObject();
         /*GPS 설정 뒤에 액티비티 재 질행해야 하는 문제 해결해야함.*/
         checkOnGPS();//GPS 켜져있는지 체크
-        
-        
+
+
         setMapView();/*MapView Setting*/
-        
+
 
 
         connectXml();
@@ -115,7 +117,8 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         deleteLocation();/*기존 것을 삭제하고 저장*/
                         saveLocation(myLocationPoint.getSearchX(),myLocationPoint.getSearchY());
-
+                        weatherIO io = new weatherIO(getApplicationContext());
+                        io.weatherDelete();
                         Intent intent = new Intent(MapActivity.this,MainActivity.class);
                         startActivity(intent);
                         finish();
@@ -151,6 +154,9 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
                     mapController.setMapCenter(currnetGeopoint);
                     mapController.setZoomLevel(11);
                     item.setPoint(currnetGeopoint);
+                    findPlacemarkAtLocation(currnetGeopoint.getLongitude(),currnetGeopoint.getLatitude());
+
+
                 } catch (NullPointerException e) {
                     e.printStackTrace();
                 }
@@ -357,10 +363,12 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
         editor.putString("LATITUDE",latitude+"");
         editor.putString("LONGITUDE",logitude+"");
         editor.commit();
+        Log.d("TAG","저장된 위도 경도 : "+latitude+logitude);
     }
     public void deleteLocation(){
         if(editor!=null) {
-            editor.remove("Location");
+            editor.remove("LATITUDE");
+            editor.remove("LONGITUDE");
             editor.commit();
         }
     }
@@ -419,7 +427,7 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
         }
         locationTextView.setText(nMapPlacemark.toString());
         item.setTitle("현재 위치");/*마커 아이템 수정*/
-        myLocationPoint = new searchBuffer(myGeoPoint.getLongitude(),myGeoPoint.getLatitude(),nMapPlacemark.toString());
+        myLocationPoint = new searchBuffer(currnetGeopoint.getLongitude(),currnetGeopoint.getLatitude(),nMapPlacemark.toString());
     }
 
     @Override
@@ -430,7 +438,7 @@ public class MapActivity extends NMapActivity implements InterfaceBinding {
         /*onReverseGeocoderResponse : CallBack Method 참고*/
         findPlacemarkAtLocation(point.getLongitude(),point.getLatitude());
         Log.d("TAG","저장될 위도 경도"+point.getLongitude()+"/"+point.getLatitude());
-        myGeoPoint=point;
+        currnetGeopoint=point;
 
     }
 }

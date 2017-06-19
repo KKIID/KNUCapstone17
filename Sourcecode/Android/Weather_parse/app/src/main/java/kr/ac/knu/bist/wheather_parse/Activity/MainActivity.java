@@ -22,6 +22,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import kr.ac.knu.bist.wheather_parse.Connection.Device.DeviceEngine;
+import kr.ac.knu.bist.wheather_parse.Data.CardViewIO;
+import kr.ac.knu.bist.wheather_parse.Data.DeviceData;
 import kr.ac.knu.bist.wheather_parse.Service.AlarmManager.AlarmManage;
 import kr.ac.knu.bist.wheather_parse.Layout.RegisteredModuleAdapter.CardViewAdapter;
 import kr.ac.knu.bist.wheather_parse.Data.CardViewData;
@@ -52,6 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, Button.OnClickListener {
@@ -108,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         /*Test Code*/
         setWeather();
         /*받아 온 날씨 정보를 notification에 전달*/
-        CustomNotification.showNotification(getApplicationContext(),"좋은 하루 되세요~~",temp,airConditionValue,humidity,weatherParse.weatherIconUI(weatherState,sunSetRise), airConditonString);
+        CustomNotification.showNotification(getApplicationContext(),"날씨 로딩중...","좋은 하루 되세요~~",temp,airConditionValue,humidity,weatherParse.weatherIconUI(weatherState,sunSetRise), airConditonString);
         /*기기 목록을 가져오기 위해 필요한 부분*/
         myDataset = new ArrayList<>();
         mAdapter = new CardViewAdapter(myDataset);
@@ -125,8 +128,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             }
         };
-        registerReceiver(broadcastReceiver, intentfilter);
-
+        try {
+            registerReceiver(broadcastReceiver, intentfilter);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void setWeather() {
@@ -209,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     object = array.getJSONObject(i);
                     moduleName = object.getString("name");
                     final int num = object.getInt("id");
-                    int[] icons = {R.drawable.bulb, R.drawable.telev, R.drawable.airconditioner, R.drawable.alert};
+                    int[] icons = {R.drawable.bulb, R.drawable.telev, R.drawable.airconditioner, R.drawable.fan};
                     int selected;
                     char code = '0';
                     switch (moduleName) {
@@ -242,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             code = '0';
                     }
                     final char finalCode = code;
-                    myDataset.add(i,new CardViewData(moduleName, icons[selected],num, code, new View.OnClickListener() {/*중복 클릭을 방지하는 코드*/
+                    myDataset.add(i,new CardViewData(moduleName, icons[selected],num/*id*/, code, new View.OnClickListener() {/*중복 클릭을 방지하는 코드*/
                         @Override
                         public void onClick(View v) {
                             if (SystemClock.elapsedRealtime() - mLastClickTime < 2000){
@@ -251,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             mLastClickTime = SystemClock.elapsedRealtime();
                             Toast.makeText(getApplicationContext(), "동작중입니다.",Toast.LENGTH_SHORT).show();
                             try {
-                                DeviceEngine.controlDevice(temp + 1, true, finalCode);
+                                DeviceEngine.controlDevice(num, true, finalCode);
                             } catch (Exception e) {
                                 Toast.makeText(getApplicationContext(), "동작에 실패하였습니다.",Toast.LENGTH_SHORT).show();
                             } finally {
@@ -274,7 +280,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     e.printStackTrace();
                 }
             }
-            mAdapter.notifyDataSetChanged();
         }
 
     }
